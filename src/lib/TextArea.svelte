@@ -1,7 +1,8 @@
 <script lang="ts">
+  let { text }: { text: string } = $props();
 </script>
 
-<textarea readonly></textarea>
+<textarea readonly>{text}</textarea>
 
 <style>
   textarea {
