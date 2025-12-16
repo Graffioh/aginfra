@@ -1,11 +1,8 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AgentRequest, AgentResponse } from "./types";
 import { Request, Response } from "express";
-
-dotenv.config();
+import { runLoop } from "./loop";
 
 const app = express();
 
@@ -18,34 +15,18 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-
 const SYSTEM_PROMPT = `
 You are a helpful assistant that can answer questions and help with tasks.
-Your response should be concise and to the point.`.trim();
+Your response should be concise and to the point.
 
-let CONTEXT: string[] = [];
-
-function buildPrompt(prompt: string) {
-  // Add the system prompt only on first turn (the context right now is not being cleared)
-  const prefix = CONTEXT.length === 0 ? `${SYSTEM_PROMPT}\n\n` : "";
-  const history = CONTEXT.length > 0 ? CONTEXT.join("\n") + "\n\n" : "";
-  return `${prefix}${history}User: ${prompt}\nAssistant:`;
-}
+You have access to tools to help you with your tasks (if needed).
+`.trim();
 
 app.post("/api/agent", async (req: Request<AgentRequest>, res: Response<AgentResponse>) => {
   try {
     const { prompt } = req.body;
-    const inputPrompt = buildPrompt(prompt);
 
-    const result = await model.generateContent(inputPrompt);
-    const assistantText = result.response.text().trim();
-
-    CONTEXT.push(`User: ${prompt}`);
-    CONTEXT.push(`Assistant: ${assistantText}`);
-    console.log(`Response generated (${assistantText.length} characters)`);
-
+    const assistantText = await runLoop(prompt, SYSTEM_PROMPT);
     res.json({ text: assistantText });
   } catch (error) {
     console.error("[ERROR]", error);

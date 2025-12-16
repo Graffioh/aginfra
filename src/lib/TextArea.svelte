@@ -2,10 +2,10 @@
   let { text }: { text: string } = $props();
 </script>
 
-<textarea readonly>{text}</textarea>
+<div class="chat-display">{@html text}</div>
 
 <style>
-  textarea {
+  .chat-display {
     height: 80%;
     resize: none;
     font-size: 16px;
@@ -15,5 +15,7 @@
     border-radius: 5px;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
+    white-space: pre-wrap;
+    overflow-y: auto;
   }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   let message = $state("");
-  let { onsend }: { onsend: (message: string) => void } = $props();
+  let { onsend } = $props();
 </script>
 
 <textarea placeholder="Type your message..." bind:value={message}></textarea>
