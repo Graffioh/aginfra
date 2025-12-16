@@ -8,9 +8,31 @@
   let chatText = $state("");
   let isSending = $state(false);
 
+  function escapeHtml(input: string) {
+    return input.replace(/[&<>"']/g, (ch) => {
+      switch (ch) {
+        case "&":
+          return "&amp;";
+        case "<":
+          return "&lt;";
+        case ">":
+          return "&gt;";
+        case '"':
+          return "&quot;";
+        case "'":
+          return "&#39;";
+        default:
+          return ch;
+      }
+    });
+  }
+
   function updateChatText() {
     chatText = messages
-      .map((m) => `<b>${m.role === "user" ? "You" : "Assistant"}:</b> ${m.content}`)
+      .map(
+        (m) =>
+          `<b>${m.role === "user" ? "You" : "Assistant"}:</b> ${escapeHtml(m.content)}`
+      )
       .join("\n\n");
   }
 

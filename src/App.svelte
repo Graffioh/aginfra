@@ -1,11 +1,12 @@
 <script lang="ts">
   import Chat from './lib/Chat.svelte'
+  import AgentInspection from './lib/AgentInspection.svelte'
 </script>
 
 <main>
   <div id="panels">
     <div id="panel1">
-      Agent inspection panel
+      <AgentInspection />
     </div>
     <div id="panel2">
       <Chat />
@@ -28,7 +29,6 @@
 
   #panel1 {
     width: 50%;
-    background-color: red;
   }
 
   #panel2 {

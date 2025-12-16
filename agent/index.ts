@@ -34,6 +34,27 @@ app.post("/api/agent", async (req: Request<AgentRequest>, res: Response<AgentRes
   }
 });
 
+app.get("/api/agent/events", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  res.flushHeaders();
+
+  res.write("data: Connected to SSE!\n\n");
+
+  const interval = setInterval(() => {
+    const message = `Hello at ${new Date().toISOString()}`;
+    res.write(`data: ${message}\n\n`);
+  }, 2000);
+
+  req.on("close", () => {
+    clearInterval(interval);
+    res.end();
+    console.log("SSE client disconnected");
+  });
+});
+
 app.listen(3002, () => {
   console.log("Agent backend running on http://localhost:3002");
   console.log("Listening for requests...");

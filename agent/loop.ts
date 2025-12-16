@@ -27,6 +27,8 @@ export async function runLoop(userInput: string, systemPrompt?: string) {
 
         messages.push(...CONTEXT);
 
+        console.log("\n *** Agent is thinking... ***");
+
         const response = await fetch(OPENROUTER_API_URL, {
             method: "POST",
             headers: {
@@ -41,17 +43,26 @@ export async function runLoop(userInput: string, systemPrompt?: string) {
                 tool_choice: "auto",
             }),
         });
+        
+        if (!response.ok) {
+            throw new Error(`OpenRouter API error: ${response.statusText}`);
+        }
 
         const data = await response.json();
         const msg = data.choices[0].message;
 
+        console.log("\n📨 Model message:", JSON.stringify(msg, null, 2));
+
         const toolCalls: AgentToolCall[] = msg.tool_calls;
         if (toolCalls && toolCalls.length > 0) {
+            console.log("\n*** Model decided: USE A TOOL ***");
+
             for (const call of toolCalls) {
                 const toolName = call.function.name;
                 const args = JSON.parse(call.function.arguments || "{}");
 
-                console.log("🔧 Tool call:", toolName, args);
+                console.log(`🔧 Tool call → ${toolName}`);
+                console.log("With arguments:", args);
 
                 if (!toolImplementations[toolName]) {
                     throw new Error(`Unknown tool: ${toolName}`);
@@ -72,8 +83,10 @@ export async function runLoop(userInput: string, systemPrompt?: string) {
                 });
             }
 
-            continue; 
+            continue;
         }
+
+        console.log("💬 Final Assistant message:", msg.content);
 
         const finalContent = msg.content;
         CONTEXT.push({ role: "assistant", content: finalContent });
