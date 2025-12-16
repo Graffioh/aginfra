@@ -33,6 +33,5 @@
 
   #panel2 {
     width: 50%;
-    background-color: green;
   }
 </style>

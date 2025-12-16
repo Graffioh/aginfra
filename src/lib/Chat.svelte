@@ -53,10 +53,10 @@
 
 <div id="chat">
   <TextArea text={chatText} />
-  <TextInput onsend={handleSend} />
   {#if isSending}
     <div class="status">Thinking...</div>
   {/if}
+  <TextInput onsend={handleSend} />
 </div>
 
 <style>
@@ -68,7 +68,7 @@
   }
 
   .status {
-    font-size: 12px;
-    color: #555;
+    font-size: 16px;
+    color: #b0b0b0;
   }
 </style>

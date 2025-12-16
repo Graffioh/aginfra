@@ -3,13 +3,25 @@
   let { onsend } = $props();
 </script>
 
-<textarea placeholder="Type your message..." bind:value={message}></textarea>
+<textarea
+  placeholder="Type your message..."
+  bind:value={message}
+  onkeypress={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      onsend(message);
+      message = "";
+      e.preventDefault();
+    }
+  }}
+></textarea>
 
 <button
   onclick={() => {
     onsend(message);
     message = "";
-  }}>Send</button
+  }}
+>
+  Send</button
 >
 
 <style>
