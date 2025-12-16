@@ -16,7 +16,7 @@
   let eventSource: EventSource | null = null;
 
   const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:3002";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:3002/api";
 
   function pushEvent(data: string) {
     const next = [
@@ -64,7 +64,10 @@
 
 <div id="inspection">
   <div class="header">
-    <div class="title">Agent inspection</div>
+    <div class="title-section">
+      <div class="title">Agent inspection</div>
+      <div class="model">openai/gpt-oss-120b</div>
+    </div>
     <div class="pill {status}">
       {#if status === "connecting"}Connecting...{/if}
       {#if status === "connected"}Live{/if}
@@ -100,6 +103,11 @@
       {/each}
     {/if}
   </div>
+
+  <div class="footer">
+    <img src="/dumb.svg" alt="" class="dumb-icon" />
+    <span class="dumb-text">my agent is dumb (version 0)</span>
+  </div>
 </div>
 
 <style>
@@ -110,7 +118,7 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
-    background: rgb(63, 51, 44);
+    background: rgb(0, 0, 0);
     color: #e6edf3;
     box-sizing: border-box;
   }
@@ -124,9 +132,21 @@
     background: rgba(255, 255, 255, 0.03);
   }
 
+  .title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .title {
     font-weight: 600;
     font-size: 14px;
+  }
+
+  .model {
+    font-size: 11px;
+    color: rgba(230, 237, 243, 0.6);
+    font-family: monospace;
   }
 
   .pill {
@@ -225,5 +245,26 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(214, 214, 214, 0.224);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .dumb-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .dumb-text {
+    font-size: 12px;
+    font-weight: bold;
+    color: #e6edf3;
   }
 </style>

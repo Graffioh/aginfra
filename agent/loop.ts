@@ -28,8 +28,7 @@ export async function runLoop(userInput: string, systemPrompt?: string) {
 
         messages.push(...CONTEXT);
 
-        console.log("\n *** Agent is thinking... ***");
-        sendInspectionMessage(`Agent is thinking...`); 
+        sendInspectionMessage(`Agent is thinking...`);
 
         const response = await fetch(OPENROUTER_API_URL, {
             method: "POST",
@@ -37,41 +36,36 @@ export async function runLoop(userInput: string, systemPrompt?: string) {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                 "Content-Type": "application/json",
                 "HTTP-Referer": "http://localhost:5173",
+                "X-Title": "MyAgentIsDumb",
             },
             body: JSON.stringify({
-                model: "z-ai/glm-4.5-air:free",
+                model: "openai/gpt-oss-120b",
                 messages,
                 tools: toolDefinitions,
                 tool_choice: "auto",
             }),
         });
-        
+
         if (!response.ok) {
             throw new Error(`OpenRouter API error: ${response.statusText}`);
         }
 
         const data = await response.json();
-        
-        console.log("\n📨 Full API response:", JSON.stringify(data, null, 2));
-        sendInspectionMessage(`📨 Full API response: ${JSON.stringify(data, null, 2)}`);
+        sendInspectionMessage(`📨 Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
 
         const msg = data.choices[0].message;
-
-        console.log("\n📨 Model message:", JSON.stringify(msg, null, 2));
-        sendInspectionMessage(`📨 Model message: ${JSON.stringify(msg, null, 2)}`); 
+        sendInspectionMessage(`📨 Model message: ${JSON.stringify(msg, null, 2)}`);
 
         const toolCalls: AgentToolCall[] = msg.tool_calls;
         if (toolCalls && toolCalls.length > 0) {
-            console.log("\n*** Model decided to use TOOLS ***");
-            sendInspectionMessage(`Model decided to use TOOLS`); 
+            sendInspectionMessage(`Model decided to use TOOLS`);
 
             for (const call of toolCalls) {
                 const toolName = call.function.name;
+                const toolDescription = toolDefinitions.find(t => t.function.name === toolName)?.function.description;
                 const args = JSON.parse(call.function.arguments || "{}");
 
-                console.log(`🔧 Tool call → ${toolName}`);
-                console.log("With arguments:", args);
-                sendInspectionMessage(`🔧 Tool call → ${toolName} \n with arguments: ${JSON.stringify(args, null, 2)}`); 
+                sendInspectionMessage(`🔧 Tool call → ${toolName} \n\n with arguments: ${JSON.stringify(args, null, 2)} \n\n Description: ${toolDescription}`);
 
                 if (!toolImplementations[toolName]) {
                     throw new Error(`Unknown tool: ${toolName}`);
@@ -95,8 +89,7 @@ export async function runLoop(userInput: string, systemPrompt?: string) {
             continue;
         }
 
-        console.log("💬 Final Assistant message:", msg.content);
-        sendInspectionMessage(`💬 Final Assistant message: ${msg.content}`); 
+        sendInspectionMessage(`💬 Final Assistant message: ${msg.content}`);
 
         const finalContent = msg.content;
         CONTEXT.push({ role: "assistant", content: finalContent });

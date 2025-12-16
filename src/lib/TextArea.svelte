@@ -15,7 +15,7 @@
     border-radius: 5px;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
-    white-space: pre-wrap;
+    white-space: normal;
     overflow-y: auto;
   }
 </style>

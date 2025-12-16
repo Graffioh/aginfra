@@ -20,7 +20,13 @@ const SYSTEM_PROMPT = `
 You are a helpful assistant that can answer questions and help with tasks.
 Your response should be concise and to the point.
 
+Format the bold, italic, underline, code, blockquote, list, image, and other special text with HTML.
+
 You have access to tools to help you with your tasks (if needed).
+
+Follow these rules strictly:
+- Never invent Tool arguments and these arguments MUST be valid JSON objects
+- If unsure, do NOT call tools
 `.trim();
 
 app.post("/api/agent", async (req: Request<AgentRequest>, res: Response<AgentResponse>) => {

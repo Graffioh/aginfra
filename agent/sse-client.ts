@@ -11,6 +11,7 @@ export function clearSSEClient() {
 }
 
 export function sendInspectionMessage(message: string) {
+    console.log(message);
     if (sseClient) {
         const lines = message.split(/\r?\n/);
         for (const line of lines) {

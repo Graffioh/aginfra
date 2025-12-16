@@ -9,14 +9,14 @@
   let isSending = $state(false);
 
   const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:3002";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:3002/api";
 
   function updateChatText() {
     chatText = messages
       .map(
         (m) => `<b>${m.role === "user" ? "You" : "Assistant"}:</b> ${m.content}`
       )
-      .join("\n\n");
+      .join("<br><br>");
   }
 
   async function handleSend(prompt: string) {
