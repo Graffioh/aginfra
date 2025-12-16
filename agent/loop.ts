@@ -53,10 +53,10 @@ export async function runLoop(userInput: string) {
         }
 
         const data = await response.json();
-        sendInspectionMessage(`📨 Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
+        sendInspectionMessage(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
 
         const msg = data.choices[0].message;
-        sendInspectionMessage(`📨 Model message: ${JSON.stringify(msg, null, 2)}`);
+        sendInspectionMessage(`Model message: ${JSON.stringify(msg, null, 2)}`);
 
         const toolCalls: AgentToolCall[] = msg.tool_calls;
 
@@ -74,7 +74,7 @@ export async function runLoop(userInput: string) {
                 const toolDescription = toolDefinitions.find(t => t.function.name === toolName)?.function.description;
                 const args = JSON.parse(call.function.arguments || "{}");
 
-                sendInspectionMessage(`🔧 Tool call → ${toolName} \n\n with arguments: ${JSON.stringify(args, null, 2)} \n\n Description: ${toolDescription}`);
+                sendInspectionMessage(`Tool call → ${toolName} \n\n with arguments: ${JSON.stringify(args, null, 2)} \n\n Description: ${toolDescription}`);
 
                 if (!toolImplementations[toolName]) {
                     throw new Error(`Unknown tool: ${toolName}`);
@@ -92,7 +92,7 @@ export async function runLoop(userInput: string) {
             continue;
         }
 
-        sendInspectionMessage(`💬 Final Assistant message: ${msg.content}`);
+        sendInspectionMessage(`Final Assistant message: ${msg.content}`);
 
         const finalContent = msg.content;
         context.push({ role: "assistant", content: finalContent });
