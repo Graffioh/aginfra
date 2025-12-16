@@ -38,9 +38,13 @@
     event.expanded = !event.expanded;
   }
 
+  function removeInspectionEvent(eventId: number) {
+    events = events.filter((e) => e.id !== eventId);
+  }
+
   function buildInspectionSnapshot(): string {
     if (events.length === 0) {
-      return "No events yet.\n";
+      return "No inspection events yet.\n";
     }
     return events
       .map((e) => {
@@ -115,7 +119,7 @@
 
   <div class="stream">
     {#if events.length === 0}
-      <div class="empty">No events yet.</div>
+      <div class="empty">No inspection events yet.</div>
     {:else}
       {#each events as e (e.id)}
         {@const isExpanded = e.expanded ?? false}
@@ -133,6 +137,11 @@
                 ? e.data
                 : getFirstLine(e.data)}</pre>
           </div>
+          <div class="remove-container">
+            <button class="remove-button" onclick={() => removeInspectionEvent(e.id)} title="Remove inspection event">
+              ×
+            </button>
+          </div>
         </div>
       {/each}
     {/if}
@@ -140,7 +149,7 @@
 
   <div class="footer">
     <img src="/dumb.svg" alt="" class="dumb-icon" />
-    <span class="dumb-text">my agent is dumb (version 0)</span>
+    <a href="https://github.com/Graffioh/myagentisdumb" target="_blank" rel="noopener noreferrer" class="dumb-text">my agent is dumb (version 0)</a>
   </div>
 </div>
 
@@ -253,7 +262,7 @@
 
   .row {
     display: grid;
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 90px 1fr auto;
     gap: 10px;
     padding: 6px 0;
     border-bottom: 1px solid rgba(214, 214, 214, 0.153);
@@ -311,6 +320,39 @@
     white-space: normal;
   }
 
+  .remove-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .remove-button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: rgba(230, 237, 243, 0.65);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+  }
+
+  .remove-button:hover {
+    border-color: rgba(248, 81, 73, 0.7);
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.1);
+  }
+
+  .remove-button:active {
+    background: rgba(248, 81, 73, 0.2);
+  }
+
   .footer {
     display: flex;
     align-items: center;
@@ -330,5 +372,12 @@
     font-size: 12px;
     font-weight: bold;
     color: #e6edf3;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .dumb-text:hover {
+    color: #ffffff;
+    text-decoration: underline;
   }
 </style>
