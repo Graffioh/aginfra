@@ -3,14 +3,14 @@ import express from "express";
 import cors from "cors";
 import { AgentRequest, AgentResponse } from "./types";
 import { Request, Response } from "express";
-import { runLoop } from "./loop";
+import { runLoop, clearContext } from "./loop";
 import { clearInspectionClient, setInspectionClient, clearContextClient, setContextClient } from "./sse-client";
 
 const app = express();
 
 const corsOptions = {
   origin: "http://localhost:5173",
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "DELETE"],
 };
 
 app.use(cors(corsOptions));
@@ -63,6 +63,16 @@ app.get("/api/agent/events/context", async (req: Request, res: Response) => {
     res.end();
     console.log("Context SSE Client disconnected");
   });
+});
+
+app.delete("/api/agent/context", async (req: Request, res: Response) => {
+  try {
+    clearContext();
+    res.status(200).json({ message: "Context cleared" });
+  } catch (error) {
+    console.error("[ERROR] Failed to clear context:", error);
+    res.status(500).send("Failed to clear context");
+  }
 });
 
 app.listen(3002, () => {

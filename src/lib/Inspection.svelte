@@ -11,8 +11,6 @@
     expanded?: boolean;
   };
 
-  /*  on the right of the current context header, put a trash icon to delete the context */
-
   let events: InspectionEvent[] = $state([]);
   let status = $state<"connecting" | "connected" | "error">("connecting");
   let lastError = $state<string | null>(null);
