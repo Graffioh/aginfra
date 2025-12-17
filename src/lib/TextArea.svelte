@@ -16,6 +16,8 @@
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
     white-space: normal;
+    line-height: 1.5;
+    word-break: break-word;
     overflow-y: auto;
   }
 </style>

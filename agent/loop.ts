@@ -1,6 +1,6 @@
 import { AgentMessage, AgentToolCall } from "./types";
 import { toolDefinitions, toolImplementations } from "./tools/base";
-import { sendInspectionMessage, sendContextUpdate } from "../inspection/sse/sse-client";
+import { sendInspectionMessage, sendContextUpdate } from "../inspection/sse/client";
 
 let context: AgentMessage[] = [];
 
@@ -29,6 +29,7 @@ You have access to tools to help you with your tasks (if needed).
 Follow these rules strictly:
 - Never invent Tool arguments and these arguments MUST be valid JSON objects
 - If unsure, do NOT call tools
+- Keep formatting consistent and clean (do not use <p> or similar if not needed)
 `.trim();
 
 export async function runLoop(userInput: string) {
