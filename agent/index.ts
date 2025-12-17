@@ -4,7 +4,7 @@ import cors from "cors";
 import { AgentRequest, AgentResponse } from "./types";
 import { Request, Response } from "express";
 import { runLoop } from "./loop";
-import { clearSSEClient, setSSEClient } from "./sse-client";
+import { clearInspectionClient, setInspectionClient, clearContextClient, setContextClient } from "./sse-client";
 
 const app = express();
 
@@ -36,14 +36,32 @@ app.get("/api/agent/events/inspection", async (req: Request, res: Response) => {
 
   res.flushHeaders();
 
-  setSSEClient(res);
+  setInspectionClient(res);
 
   res.write("data: Connected to Agent Inspection Channel!\n\n");
 
   req.on("close", () => {
-    clearSSEClient();
+    clearInspectionClient();
     res.end();
-    console.log("SSE Client disconnected");
+    console.log("Inspection SSE Client disconnected");
+  });
+});
+
+app.get("/api/agent/events/context", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  res.flushHeaders();
+
+  setContextClient(res);
+
+  res.write("data: []\n\n");
+
+  req.on("close", () => {
+    clearContextClient();
+    res.end();
+    console.log("Context SSE Client disconnected");
   });
 });
 

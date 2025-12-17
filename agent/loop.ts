@@ -1,8 +1,13 @@
 import { AgentMessage, AgentToolCall } from "./types";
 import { toolDefinitions, toolImplementations } from "./tools/base";
-import { sendInspectionMessage } from "./sse-client";
+import { sendInspectionMessage, sendContextUpdate } from "./sse-client";
 
 let context: AgentMessage[] = [];
+
+function updateContext(newMessage: AgentMessage) {
+    context.push(newMessage);
+    sendContextUpdate(context);
+}
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -22,13 +27,15 @@ Follow these rules strictly:
 
 // Main loop for the agent using OpenRouter API
 export async function runLoop(userInput: string) {
-    context.push({ role: "user", content: userInput });
+    // Include system prompt in context if it's the first message
+    if (context.length === 0) {
+        updateContext({ role: "system", content: SYSTEM_PROMPT });
+    }
+    
+    updateContext({ role: "user", content: userInput });
 
     while (true) {
-        const messages: AgentMessage[] = [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...context,
-        ];
+        const messages: AgentMessage[] = [...context];
 
         sendInspectionMessage(`Agent is thinking...`);
 
@@ -63,7 +70,7 @@ export async function runLoop(userInput: string) {
         if (toolCalls && toolCalls.length > 0) {
             sendInspectionMessage(`Model decided to use TOOLS: ${toolCalls.map(call => call.function.name).join(", ")}`);
 
-            context.push({
+            updateContext({
                 role: "assistant",
                 content: "",
                 tool_calls: toolCalls
@@ -82,7 +89,7 @@ export async function runLoop(userInput: string) {
 
                 const result = await toolImplementations[toolName](args);
 
-                context.push({
+                updateContext({
                     role: "tool",
                     tool_call_id: call.id,
                     content: JSON.stringify(result),
@@ -92,10 +99,10 @@ export async function runLoop(userInput: string) {
             continue;
         }
 
-        sendInspectionMessage(`Final Assistant message: ${msg.content}`);
+        const finalContent = msg.content ? msg.content : `The agent is confused x.x`;
+        sendInspectionMessage(`Final Assistant message: ${finalContent}`);
 
-        const finalContent = msg.content;
-        context.push({ role: "assistant", content: finalContent });
+        updateContext({ role: "assistant", content: msg.content });
 
         return finalContent;
     }

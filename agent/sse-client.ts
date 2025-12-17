@@ -1,22 +1,37 @@
 import type { Response } from "express";
 
-let sseClient: Response | null = null;
+let inspectionClient: Response | null = null;
+let contextClient: Response | null = null;
 
-export function setSSEClient(res: Response) {
-    sseClient = res;
+export function setInspectionClient(res: Response) {
+    inspectionClient = res;
 }
 
-export function clearSSEClient() {
-    sseClient = null;
+export function clearInspectionClient() {
+    inspectionClient = null;
+}
+
+export function setContextClient(res: Response) {
+    contextClient = res;
+}
+
+export function clearContextClient() {
+    contextClient = null;
 }
 
 export function sendInspectionMessage(message: string) {
     console.log(message);
-    if (sseClient) {
+    if (inspectionClient) {
         const lines = message.split(/\r?\n/);
         for (const line of lines) {
-            sseClient.write(`data: ${line}\n`);
+            inspectionClient.write(`data: ${line}\n`);
         }
-        sseClient.write(`\n`);
+        inspectionClient.write(`\n`);
+    }
+}
+
+export function sendContextUpdate(context: any[]) {
+    if (contextClient) {
+        contextClient.write(`data: ${JSON.stringify(context)}\n\n`);
     }
 }

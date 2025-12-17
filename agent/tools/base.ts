@@ -23,13 +23,13 @@ export const toolDefinitions = [
       type: "function",
       function: {
         name: "getMovie",
-        description: "Get information about a movie by title.",
+        description: "Get information about a movie, tv serie or anime by title.",
         parameters: {
           type: "object",
           properties: {
             title: {
               type: "string",
-              description: "Movie title such as 'The Dark Knight', 'Inception', etc."
+              description: "Movie, tv serie or anime title such as 'The Dark Knight', 'Inception', 'Attack on Titan', etc."
             }
           },
           required: ["title"]

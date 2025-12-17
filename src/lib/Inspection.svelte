@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+  import DownloadSnapshot from "./DownloadSnapshot.svelte";
+  import CurrentContext from "./CurrentContext.svelte";
+  import InspectionEventRow from "./InspectionEventRow.svelte";
 
   type InspectionEvent = {
     id: number;
@@ -7,6 +10,8 @@
     data: string;
     expanded?: boolean;
   };
+
+  /*  on the right of the current context header, put a trash icon to delete the context */
 
   let events: InspectionEvent[] = $state([]);
   let status = $state<"connecting" | "connected" | "error">("connecting");
@@ -26,45 +31,12 @@
     events = next.length > 300 ? next.slice(next.length - 300) : next;
   }
 
-  function isMultiline(data: string): boolean {
-    return data.includes("\n");
-  }
-
-  function getFirstLine(data: string): string {
-    return data.split("\n")[0];
-  }
-
   function toggleExpand(event: InspectionEvent) {
     event.expanded = !event.expanded;
   }
 
   function removeInspectionEvent(eventId: number) {
     events = events.filter((e) => e.id !== eventId);
-  }
-
-  function buildInspectionSnapshot(): string {
-    if (events.length === 0) {
-      return "No inspection events yet.\n";
-    }
-    return events
-      .map((e) => {
-        const timestamp = new Date(e.ts).toLocaleString();
-        return `[${timestamp}] ${e.data}`;
-      })
-      .join("\n");
-  }
-
-  function downloadInspectionSnapshot() {
-    const content = buildInspectionSnapshot();
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "inspection-snapshot.txt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url); 
   }
 
   onMount(() => {
@@ -98,13 +70,7 @@
       <div class="model">openai/gpt-oss-120b</div>
     </div>
     <div class="header-right-half">
-      <button
-        class="download-button"
-        onclick={downloadInspectionSnapshot}
-        title="Download inspection log"
-      >
-        download txt snapshot ⬇
-      </button>
+      <DownloadSnapshot {events} />
       <div class="pill {status}">
         {#if status === "connecting"}Connecting...{/if}
         {#if status === "connected"}Live{/if}
@@ -122,34 +88,25 @@
       <div class="empty">No inspection events yet.</div>
     {:else}
       {#each events as e (e.id)}
-        {@const isExpanded = e.expanded ?? false}
-        {@const multiline = isMultiline(e.data)}
-        <div class="row">
-          <div class="ts">{new Date(e.ts).toLocaleTimeString()}</div>
-          <div class="data-container">
-            {#if multiline}
-              <button class="expand-button" onclick={() => toggleExpand(e)}>
-                <span class="arrow {isExpanded ? 'expanded' : ''}">▶</span>
-              </button>
-            {/if}
-            <pre class="data {isExpanded ? '' : 'collapsed'}">{isExpanded ||
-              !multiline
-                ? e.data
-                : getFirstLine(e.data)}</pre>
-          </div>
-          <div class="remove-container">
-            <button class="remove-button" onclick={() => removeInspectionEvent(e.id)} title="Remove inspection event">
-              ×
-            </button>
-          </div>
-        </div>
+        <InspectionEventRow
+          event={e}
+          onToggleExpand={toggleExpand}
+          onRemove={removeInspectionEvent}
+        />
       {/each}
     {/if}
   </div>
 
+  <CurrentContext />
+
   <div class="footer">
     <img src="/dumb.svg" alt="" class="dumb-icon" />
-    <a href="https://github.com/Graffioh/myagentisdumb" target="_blank" rel="noopener noreferrer" class="dumb-text">my agent is dumb (version 0)</a>
+    <a
+      href="https://github.com/Graffioh/myagentisdumb"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="dumb-text">my agent is dumb</a
+    >
   </div>
 </div>
 
@@ -198,30 +155,6 @@
     font-family: monospace;
   }
 
-  .download-button {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    color: #c9d1d9;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .download-button:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #e6edf3;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .download-button:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
   .pill {
     font-size: 12px;
     padding: 2px 8px;
@@ -260,99 +193,6 @@
     font-size: 13px;
   }
 
-  .row {
-    display: grid;
-    grid-template-columns: 90px 1fr auto;
-    gap: 10px;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(214, 214, 214, 0.153);
-  }
-
-  .ts {
-    font-size: 12px;
-    color: rgba(230, 237, 243, 0.65);
-  }
-
-  .data-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .expand-button {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: rgba(230, 237, 243, 0.65);
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .expand-button:hover {
-    color: #e6edf3;
-  }
-
-  .arrow {
-    font-size: 10px;
-    transition: transform 0.2s;
-    display: inline-block;
-  }
-
-  .arrow.expanded {
-    transform: rotate(90deg);
-  }
-
-  .data {
-    margin: 0;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-break: break-word;
-    color: #e6edf3;
-    flex: 1;
-  }
-
-  .data.collapsed {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-  }
-
-  .remove-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  .remove-button {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    color: rgba(230, 237, 243, 0.65);
-    cursor: pointer;
-    font-size: 18px;
-    line-height: 1;
-    padding: 2px 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    width: 24px;
-    height: 24px;
-  }
-
-  .remove-button:hover {
-    border-color: rgba(248, 81, 73, 0.7);
-    color: #ff7b72;
-    background: rgba(248, 81, 73, 0.1);
-  }
-
-  .remove-button:active {
-    background: rgba(248, 81, 73, 0.2);
-  }
-
   .footer {
     display: flex;
     align-items: center;
@@ -370,10 +210,10 @@
 
   .dumb-text {
     font-size: 12px;
-    font-weight: bold;
-    color: #e6edf3;
+    font-style: italic;
     text-decoration: none;
     transition: color 0.2s;
+    color: rgb(230, 237, 243);
   }
 
   .dumb-text:hover {
