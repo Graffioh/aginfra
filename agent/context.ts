@@ -1,6 +1,5 @@
-import { AgentMessage } from "./types";
-import { sendInspectionMessage, sendContextUpdate, sendTokenUsageUpdate } from "../inspection/sse/client";
-import type { TokenUsage } from "../inspection/types";
+import type { AgentMessage, TokenUsage } from "../protocol/types";
+import { inspectionReporter } from "./inspection";
 
 let context: AgentMessage[] = [];
 let lastTokenUsage: TokenUsage = {
@@ -37,13 +36,13 @@ export async function fetchModelContextLimit(model: string): Promise<number | nu
 
 export async function updateContext(newMessage: AgentMessage) {
     context.push(newMessage);
-    await sendContextUpdate(context);
+    await inspectionReporter.context(context);
 }
 
 export async function clearContext(currentModel: string) {
     context = [];
-    await sendContextUpdate(context);
-    await sendInspectionMessage("Context cleared");
+    await inspectionReporter.context(context);
+    await inspectionReporter.message("Context cleared");
     
     // Reset token usage to show "?" in the UI
     const contextLimit = await fetchModelContextLimit(currentModel);
@@ -55,7 +54,7 @@ export async function clearContext(currentModel: string) {
         remainingTokens: null,
     };
     lastTokenUsage = resetTokenUsage;
-    await sendTokenUsageUpdate(resetTokenUsage);
+    await inspectionReporter.tokens(resetTokenUsage);
 }
 
 export function getContext(): AgentMessage[] {
@@ -69,4 +68,3 @@ export function getTokenUsage(): TokenUsage {
 export function setLastTokenUsage(usage: TokenUsage) {
     lastTokenUsage = usage;
 }
-

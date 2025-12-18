@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { AgentRequest, AgentResponse } from "./types";
+import type { AgentRequest, AgentResponse } from "../protocol/types";
 import { Request, Response } from "express";
 import { runLoop, clearContext, getContext, getTokenUsage } from "./loop";
 

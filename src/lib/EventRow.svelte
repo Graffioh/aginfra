@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { InspectionEvent } from "../../agent/types";
+  import type { InspectionEvent } from "../../protocol/types";
 
   interface Props {
     event: InspectionEvent;
