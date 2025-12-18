@@ -1,71 +1,28 @@
 import { AgentMessage, AgentToolCall } from "./types";
 import { toolDefinitions, toolImplementations } from "./tools/base";
-import { sendInspectionMessage, sendContextUpdate, sendTokenUsageUpdate } from "../inspection/sse/client";
+import { sendInspectionMessage, sendTokenUsageUpdate } from "../inspection/sse/client";
 import type { TokenUsage } from "../inspection/types";
+import {
+    fetchModelContextLimit,
+    updateContext,
+    clearContext as clearContextUtil,
+    getContext as getContextUtil,
+    getTokenUsage as getTokenUsageUtil,
+    setLastTokenUsage
+} from "./context";
 
-let context: AgentMessage[] = [];
 let currentModel = "openai/gpt-oss-120b";
-let lastTokenUsage: TokenUsage = {
-    promptTokens: 0,
-    completionTokens: 0,
-    totalTokens: 0,
-    contextLimit: null,
-    remainingTokens: null,
-};
-
-const modelContextCache: Record<string, number> = {};
-
-async function fetchModelContextLimit(model: string): Promise<number | null> {
-    // The model context limit is cached to avoid unnecessary API calls since it doesn't change 
-    if (modelContextCache[model]) {
-        return modelContextCache[model];
-    }
-
-    try {
-        const response = await fetch("https://openrouter.ai/api/v1/models", {
-            headers: { "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}` }
-        });
-        const data = await response.json();
-        const modelInfo = data.data?.find((m: { id: string }) => m.id === model);
-        const contextLength = modelInfo?.context_length;
-        if (contextLength) {
-            modelContextCache[model] = contextLength;
-        }
-        return contextLength || null;
-    } catch {
-        return null;
-    }
-}
-
-async function updateContext(newMessage: AgentMessage) {
-    context.push(newMessage);
-    await sendContextUpdate(context);
-}
 
 export async function clearContext() {
-    context = [];
-    await sendContextUpdate(context);
-    await sendInspectionMessage("Context cleared");
-    
-    // Reset token usage to show "?" in the UI
-    const contextLimit = await fetchModelContextLimit(currentModel);
-    const resetTokenUsage: TokenUsage = {
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        contextLimit,
-        remainingTokens: null,
-    };
-    lastTokenUsage = resetTokenUsage;
-    await sendTokenUsageUpdate(resetTokenUsage);
+    await clearContextUtil(currentModel);
 }
 
 export function getContext(): AgentMessage[] {
-    return [...context];
+    return getContextUtil();
 }
 
 export function getTokenUsage(): TokenUsage {
-    return { ...lastTokenUsage };
+    return getTokenUsageUtil();
 }
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
@@ -87,14 +44,16 @@ Follow these rules strictly:
 
 export async function runLoop(userInput: string) {
     // Include system prompt in context if it's the first message
-    if (context.length === 0) {
+    const startContext = getContext();
+    if (startContext.length === 0) {
         await updateContext({ role: "system", content: SYSTEM_PROMPT });
     }
 
     await updateContext({ role: "user", content: userInput });
 
     while (true) {
-        const messages: AgentMessage[] = [...context];
+        const currentContext = getContext();
+        const messages: AgentMessage[] = currentContext;
 
         await sendInspectionMessage(`Agent is thinking...`);
 
@@ -131,7 +90,7 @@ export async function runLoop(userInput: string) {
                 contextLimit,
                 remainingTokens: contextLimit !== null ? contextLimit - (data.usage.total_tokens || 0) : null,
             };
-            lastTokenUsage = tokenUsage;
+            setLastTokenUsage(tokenUsage);
             await sendTokenUsageUpdate(tokenUsage);
         }
 
