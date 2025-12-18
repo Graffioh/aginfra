@@ -16,6 +16,7 @@ app.use(express.json());
 // Store SSE clients
 let inspectionClients: Response[] = [];
 let contextClients: Response[] = [];
+let tokenClients: Response[] = [];
 
 // Server sent events (SSE) Inspection events endpoint
 app.get("/api/inspection/messages", async (req: Request, res: Response) => {
@@ -108,6 +109,47 @@ app.post("/api/inspection/context", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[ERROR] Failed to send context update:", error);
     res.status(500).json({ error: "Failed to send context update" });
+  }
+});
+
+// Server sent events (SSE) Token usage endpoint
+app.get("/api/inspection/tokens", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  res.flushHeaders();
+
+  tokenClients.push(res);
+
+  res.write("data: {}\n\n");
+
+  req.on("close", () => {
+    tokenClients = tokenClients.filter((client) => client !== res);
+    res.end();
+    console.log("Token SSE Client disconnected");
+  });
+});
+
+// HTTP endpoint for agent to send token usage updates
+app.post("/api/inspection/tokens", async (req: Request, res: Response) => {
+  try {
+    const usage = req.body;
+
+    // Broadcast to all connected token clients
+    tokenClients.forEach((client) => {
+      try {
+        client.write(`data: ${JSON.stringify(usage)}\n\n`);
+      } catch (error) {
+        // Remove dead clients
+        tokenClients = tokenClients.filter((c) => c !== client);
+      }
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("[ERROR] Failed to send token usage update:", error);
+    res.status(500).json({ error: "Failed to send token usage update" });
   }
 });
 

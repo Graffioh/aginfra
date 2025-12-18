@@ -1,8 +1,34 @@
 import { AgentMessage, AgentToolCall } from "./types";
 import { toolDefinitions, toolImplementations } from "./tools/base";
-import { sendInspectionMessage, sendContextUpdate } from "../inspection/sse/client";
+import { sendInspectionMessage, sendContextUpdate, sendTokenUsageUpdate } from "../inspection/sse/client";
+import type { TokenUsage } from "../inspection/types";
 
 let context: AgentMessage[] = [];
+let currentModel = "openai/gpt-oss-120b";
+
+const modelContextCache: Record<string, number> = {};
+
+async function fetchModelContextLimit(model: string): Promise<number | null> {
+    // The model context limit is cached to avoid unnecessary API calls since it doesn't change 
+    if (modelContextCache[model]) {
+        return modelContextCache[model];
+    }
+
+    try {
+        const response = await fetch("https://openrouter.ai/api/v1/models", {
+            headers: { "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}` }
+        });
+        const data = await response.json();
+        const modelInfo = data.data?.find((m: { id: string }) => m.id === model);
+        const contextLength = modelInfo?.context_length;
+        if (contextLength) {
+            modelContextCache[model] = contextLength;
+        }
+        return contextLength || null;
+    } catch {
+        return null;
+    }
+}
 
 async function updateContext(newMessage: AgentMessage) {
     context.push(newMessage);
@@ -41,7 +67,7 @@ export async function runLoop(userInput: string) {
     if (context.length === 0) {
         await updateContext({ role: "system", content: SYSTEM_PROMPT });
     }
-    
+
     await updateContext({ role: "user", content: userInput });
 
     while (true) {
@@ -58,7 +84,7 @@ export async function runLoop(userInput: string) {
                 "X-Title": "MyAgentIsDumb",
             },
             body: JSON.stringify({
-                model: "openai/gpt-oss-120b",
+                model: currentModel,
                 messages,
                 tools: toolDefinitions,
                 tool_choice: "auto",
@@ -71,6 +97,19 @@ export async function runLoop(userInput: string) {
 
         const data = await response.json();
         await sendInspectionMessage(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
+
+        // Extract and send token usage
+        if (data.usage) {
+            const contextLimit = await fetchModelContextLimit(currentModel);
+            const tokenUsage: TokenUsage = {
+                promptTokens: data.usage.prompt_tokens || 0,
+                completionTokens: data.usage.completion_tokens || 0,
+                totalTokens: data.usage.total_tokens || 0,
+                contextLimit,
+                remainingTokens: contextLimit !== null ? contextLimit - (data.usage.total_tokens || 0) : null,
+            };
+            await sendTokenUsageUpdate(tokenUsage);
+        }
 
         const msg = data.choices[0].message;
         await sendInspectionMessage(`Model message: ${JSON.stringify(msg, null, 2)}`);

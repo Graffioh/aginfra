@@ -1,15 +1,19 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-
-  type ContextMessage = {
-    role: string;
-    content: string;
-    tool_calls?: any[];
-  };
+  import type { TokenUsage } from "../../inspection/types";
+  import type { ContextMessage } from "../../inspection/types";
 
   let context: ContextMessage[] = $state([]);
+  let tokenUsage: TokenUsage = $state({
+    promptTokens: 0,
+    completionTokens: 0,
+    totalTokens: 0,
+    contextLimit: null,
+    remainingTokens: null,
+  });
   let contextExpanded = $state(false);
   let contextEventSource: EventSource | null = null;
+  let tokenEventSource: EventSource | null = null;
 
   const AGENT_URL =
     import.meta.env.VITE_AGENT_URL || "http://localhost:3002/api";
@@ -53,6 +57,16 @@
     }
   }
 
+  function formatTokens(num: number | null): string {
+    if (num === null) {
+      return "?";
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + "k";
+    }
+    return num.toString();
+  }
+
   onMount(() => {
     contextEventSource = new EventSource(INSPECTION_URL + "/inspection/context");
 
@@ -68,11 +82,30 @@
     contextEventSource.onerror = () => {
       console.error("Context SSE connection error");
     };
+
+    tokenEventSource = new EventSource(INSPECTION_URL + "/inspection/tokens");
+
+    tokenEventSource.onmessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.totalTokens !== undefined) {
+          tokenUsage = data;
+        }
+      } catch (e) {
+        console.error("Failed to parse token data:", e);
+      }
+    };
+
+    tokenEventSource.onerror = () => {
+      console.error("Token SSE connection error");
+    };
   });
 
   onDestroy(() => {
     contextEventSource?.close();
     contextEventSource = null;
+    tokenEventSource?.close();
+    tokenEventSource = null;
   });
 </script>
 
@@ -91,6 +124,9 @@
       <span class="context-title"
         >Current Context ({context.length} messages)</span
       >
+      <span class="token-info">
+        {formatTokens(tokenUsage.contextLimit !== null && tokenUsage.remainingTokens !== null ? tokenUsage.contextLimit - tokenUsage.remainingTokens : 0)} / {formatTokens(tokenUsage.contextLimit)} tokens
+      </span>
     </div>
     <div class="context-header-right">
       <button 
@@ -170,6 +206,15 @@
     font-size: 13px;
     font-weight: 600;
     color: #e6edf3;
+  }
+
+  .token-info {
+    font-size: 11px;
+    color: rgba(201, 209, 217, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
   }
 
   .refresh-context-button {

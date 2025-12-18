@@ -25,11 +25,11 @@ app.post("/api/agent", async (req: Request<AgentRequest>, res: Response<AgentRes
     res.json({ text: assistantText });
   } catch (error) {
     console.error("[ERROR]", error);
-    res.status(500).send("Agent error");
+    res.status(500).send({ text: "Agent error" });
   }
 });
 
-// Get context endpoint
+// Get Agent context endpoint
 app.get("/api/agent/context", async (req: Request, res: Response) => {
   try {
     const currentContext = getContext();
@@ -40,7 +40,7 @@ app.get("/api/agent/context", async (req: Request, res: Response) => {
   }
 });
 
-// Delete context endpoint
+// Delete Agent context endpoint
 app.delete("/api/agent/context", async (req: Request, res: Response) => {
   try {
     await clearContext();

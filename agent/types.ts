@@ -1,19 +1,19 @@
-export interface AgentRequest {
+export type AgentRequest = {
     prompt: string;
 }
 
-export interface AgentResponse {
+export type AgentResponse = {
     text: string;
 }
 
-export interface AgentMessage {
+export type AgentMessage = {
     role: "user" | "assistant" | "system" | "tool";
     content: string;
     tool_call_id?: string;
     tool_calls?: AgentToolCall[];
 }
 
-export interface AgentToolCall {
+export type AgentToolCall = {
     id: string;
     type: "function";
     function: {
@@ -22,7 +22,7 @@ export interface AgentToolCall {
     };
 }
 
-export interface InspectionEvent {
+export type InspectionEvent = {
     id: number;
     ts: number;
     data: string;

@@ -1,3 +1,5 @@
+import type { TokenUsage } from "../types";
+
 const INSPECTION_URL = process.env.INSPECTION_URL || "http://localhost:3003";
 
 export async function sendInspectionMessage(message: string) {
@@ -35,5 +37,23 @@ export async function sendContextUpdate(context: any[]) {
         }
     } catch (error) {
         console.error("Error sending context update:", error);
+    }
+}
+
+export async function sendTokenUsageUpdate(usage: TokenUsage) {
+    try {
+        const response = await fetch(`${INSPECTION_URL}/api/inspection/tokens`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(usage),
+        });
+
+        if (!response.ok) {
+            console.error(`Failed to send token usage update: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error("Error sending token usage update:", error);
     }
 }
