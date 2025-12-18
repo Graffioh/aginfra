@@ -2,4 +2,5 @@
 
 for now this is my personal agent playground where i experiment and learn agent engineering
 
-<img width="1285" height="880" alt="first-screen-myagentisdumb" src="https://github.com/user-attachments/assets/d60b1b25-1cf0-4e21-b875-95492bf1bbeb" />
+<img width="1512" height="883" alt="maid-screen" src="https://github.com/user-attachments/assets/b6d35a4d-3160-4ced-849c-a8000b5dd1d7" />
+
