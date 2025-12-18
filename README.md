@@ -10,5 +10,7 @@ The goal is to make the frontend and inspection backend (SSE) a standalone compo
 
 For this purpose, `/reporter` package is used as a bridge between the inspection and the agent. The agent code need to instantiate an `InspectionReporter` so that it can send messages, context and other informations that will be useful during debugging.
 
+<img width="1040" height="339" alt="maid-diagram" src="https://github.com/user-attachments/assets/75fd2936-ee9e-4e28-8907-74df9556b499" />
+
 <img width="1512" height="883" alt="maid-screen" src="https://github.com/user-attachments/assets/b6d35a4d-3160-4ced-849c-a8000b5dd1d7" />
 
