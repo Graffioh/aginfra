@@ -5,6 +5,13 @@ import type { TokenUsage } from "../inspection/types";
 
 let context: AgentMessage[] = [];
 let currentModel = "openai/gpt-oss-120b";
+let lastTokenUsage: TokenUsage = {
+    promptTokens: 0,
+    completionTokens: 0,
+    totalTokens: 0,
+    contextLimit: null,
+    remainingTokens: null,
+};
 
 const modelContextCache: Record<string, number> = {};
 
@@ -49,11 +56,16 @@ export async function clearContext() {
         contextLimit,
         remainingTokens: null,
     };
+    lastTokenUsage = resetTokenUsage;
     await sendTokenUsageUpdate(resetTokenUsage);
 }
 
 export function getContext(): AgentMessage[] {
     return [...context];
+}
+
+export function getTokenUsage(): TokenUsage {
+    return { ...lastTokenUsage };
 }
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
@@ -119,6 +131,7 @@ export async function runLoop(userInput: string) {
                 contextLimit,
                 remainingTokens: contextLimit !== null ? contextLimit - (data.usage.total_tokens || 0) : null,
             };
+            lastTokenUsage = tokenUsage;
             await sendTokenUsageUpdate(tokenUsage);
         }
 

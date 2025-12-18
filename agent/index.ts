@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import { AgentRequest, AgentResponse } from "./types";
 import { Request, Response } from "express";
-import { runLoop, clearContext, getContext } from "./loop";
+import { runLoop, clearContext, getContext, getTokenUsage } from "./loop";
 
 const app = express();
 
@@ -59,6 +59,17 @@ app.get("/api/agent/tools", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[ERROR] Failed to get tools:", error);
     res.status(500).send("Failed to get tools");
+  }
+});
+
+// Get Agent token usage endpoint
+app.get("/api/agent/tokens", async (req: Request, res: Response) => {
+  try {
+    const tokenUsage = getTokenUsage();
+    res.status(200).json(tokenUsage);
+  } catch (error) {
+    console.error("[ERROR] Failed to get token usage:", error);
+    res.status(500).send("Failed to get token usage");
   }
 });
 

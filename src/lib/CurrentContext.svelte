@@ -44,15 +44,27 @@
     e.stopPropagation();
     
     try {
-      const response = await fetch(AGENT_URL + "/agent/context", {
-        method: "GET",
-      });
+      const [contextResponse, tokenResponse] = await Promise.all([
+        fetch(AGENT_URL + "/agent/context", {
+          method: "GET",
+        }),
+        fetch(AGENT_URL + "/agent/tokens", {
+          method: "GET",
+        }),
+      ]);
       
-      if (response.ok) {
-        const currentContext = await response.json();
+      if (contextResponse.ok) {
+        const currentContext = await contextResponse.json();
         context = currentContext;
       } else {
         console.error("Failed to refresh context");
+      }
+      
+      if (tokenResponse.ok) {
+        const currentTokenUsage = await tokenResponse.json();
+        tokenUsage = currentTokenUsage;
+      } else {
+        console.error("Failed to refresh token usage");
       }
     } catch (error) {
       console.error("Error refreshing context:", error);
