@@ -94,12 +94,12 @@
   <CurrentContext />
 
   <div class="footer">
-    <img src="/dumb.svg" alt="" class="dumb-icon" />
+    <img src="/maid-logo.svg" alt="" class="maid-icon" />
     <a
       href="https://github.com/Graffioh/myagentisdumb"
       target="_blank"
       rel="noopener noreferrer"
-      class="dumb-text">my agent is dumb</a
+      class="maid-text">my agent is dumb</a
     >
   </div>
 </div>
@@ -196,13 +196,13 @@
     background: rgba(255, 255, 255, 0.03);
   }
 
-  .dumb-icon {
+  .maid-icon {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
   }
 
-  .dumb-text {
+  .maid-text {
     font-size: 12px;
     font-style: italic;
     text-decoration: none;
@@ -210,7 +210,7 @@
     color: rgb(230, 237, 243);
   }
 
-  .dumb-text:hover {
+  .maid-text:hover {
     color: #ffffff;
     text-decoration: underline;
   }
