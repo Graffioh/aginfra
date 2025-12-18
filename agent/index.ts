@@ -51,6 +51,17 @@ app.delete("/api/agent/context", async (req: Request, res: Response) => {
   }
 });
 
+// Get Agent tools endpoint
+app.get("/api/agent/tools", async (req: Request, res: Response) => {
+  try {
+    const { toolDefinitions } = await import("./tools/base");
+    res.status(200).json(toolDefinitions);
+  } catch (error) {
+    console.error("[ERROR] Failed to get tools:", error);
+    res.status(500).send("Failed to get tools");
+  }
+});
+
 // Start the server
 app.listen(3002, () => {
   console.log("Agent backend running on http://localhost:3002");

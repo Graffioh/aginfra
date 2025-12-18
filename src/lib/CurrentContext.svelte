@@ -12,6 +12,8 @@
     remainingTokens: null,
   });
   let contextExpanded = $state(false);
+  let activeTab: "context" | "tools" = $state("context");
+  let toolDefinitions: any[] = $state([]);
   let contextEventSource: EventSource | null = null;
   let tokenEventSource: EventSource | null = null;
 
@@ -67,6 +69,21 @@
     return num.toString();
   }
 
+  async function fetchToolDefinitions() {
+    try {
+      const response = await fetch(AGENT_URL + "/agent/tools", {
+        method: "GET",
+      });
+      if (response.ok) {
+        toolDefinitions = await response.json();
+      } else {
+        console.error("Failed to fetch tools");
+      }
+    } catch (error) {
+      console.error("Error fetching tools:", error);
+    }
+  }
+
   onMount(() => {
     contextEventSource = new EventSource(INSPECTION_URL + "/inspection/context");
 
@@ -99,6 +116,8 @@
     tokenEventSource.onerror = () => {
       console.error("Token SSE connection error");
     };
+
+    fetchToolDefinitions();
   });
 
   onDestroy(() => {
@@ -125,7 +144,7 @@
         >Current Context ({context.length} messages)</span
       >
       <span class="token-info">
-        {formatTokens(tokenUsage.contextLimit !== null && tokenUsage.remainingTokens !== null ? tokenUsage.contextLimit - tokenUsage.remainingTokens : 0)} / {formatTokens(tokenUsage.contextLimit)} tokens
+        {formatTokens(tokenUsage.contextLimit !== null && tokenUsage.remainingTokens !== null ? tokenUsage.contextLimit - tokenUsage.remainingTokens : null)} / {formatTokens(tokenUsage.contextLimit)} tokens
       </span>
     </div>
     <div class="context-header-right">
@@ -148,25 +167,61 @@
     </div>
   </div>
   {#if contextExpanded}
-    <div class="context-content">
-      {#if context.length === 0}
-        <div class="empty-context">No messages in context yet.</div>
-      {:else}
-        {#each context as msg, idx (idx)}
-          <div class="context-message">
-            <div class="context-role {msg.role}">{msg.role}</div>
-            <div class="context-text">
-              {#if msg.content}
-                <pre>{msg.content}</pre>
-              {:else if msg.tool_calls}
-                <pre>{JSON.stringify(msg.tool_calls, null, 2)}</pre>
-              {:else}
-                <pre>(empty)</pre>
-              {/if}
-            </div>
-          </div>
-        {/each}
-      {/if}
+    <div class="tabs-container">
+      <div class="tabs-header">
+        <button
+          class="tab-button {activeTab === 'context' ? 'active' : ''}"
+          onclick={(e) => {
+            e.stopPropagation();
+            activeTab = "context";
+          }}
+        >
+          messages
+        </button>
+        <button
+          class="tab-button tools-tab {activeTab === 'tools' ? 'active' : ''}"
+          onclick={(e) => {
+            e.stopPropagation();
+            activeTab = "tools";
+          }}
+        >
+          tools
+        </button>
+      </div>
+      <div class="context-content">
+        {#if activeTab === "context"}
+          {#if context.length === 0}
+            <div class="empty-context">No messages in context yet.</div>
+          {:else}
+            {#each context as msg, idx (idx)}
+              <div class="context-message">
+                <div class="context-role {msg.role}">{msg.role}</div>
+                <div class="context-text">
+                  {#if msg.content}
+                    <pre>{msg.content}</pre>
+                  {:else if msg.tool_calls}
+                    <pre>{JSON.stringify(msg.tool_calls, null, 2)}</pre>
+                  {:else}
+                    <pre>(empty)</pre>
+                  {/if}
+                </div>
+              </div>
+            {/each}
+          {/if}
+        {:else if activeTab === "tools"}
+          {#if toolDefinitions.length === 0}
+            <div class="empty-context">No tools available.</div>
+          {:else}
+            {#each toolDefinitions as tool, idx (idx)}
+              <div class="tool-definition">
+                <div class="tool-name">{tool.function.name}</div>
+                <div class="tool-description">{tool.function.description}</div>
+                <pre class="tool-params">{JSON.stringify(tool.function.parameters, null, 2)}</pre>
+              </div>
+            {/each}
+          {/if}
+        {/if}
+      </div>
     </div>
   {/if}
 </div>
@@ -363,5 +418,86 @@
 
   .arrow.expanded {
     transform: rotate(90deg);
+  }
+
+  .tabs-container {
+    border-top: 1px solid rgba(214, 214, 214, 0.153);
+  }
+
+  .tabs-header {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(214, 214, 214, 0.153);
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .tab-button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: rgba(201, 209, 217, 0.7);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 12px;
+    transition: all 0.2s;
+    text-transform: lowercase;
+  }
+
+  .tab-button:hover {
+    border-color: rgba(88, 166, 255, 0.5);
+    color: rgba(201, 209, 217, 0.9);
+    background: rgba(88, 166, 255, 0.05);
+  }
+
+  .tab-button.tools-tab:hover {
+    border-color: rgba(188, 143, 255, 0.5);
+    background: rgba(188, 143, 255, 0.05);
+  }
+
+  .tab-button.active {
+    border-color: rgba(88, 166, 255, 0.7);
+    color: #79c0ff;
+    background: rgba(88, 166, 255, 0.15);
+  }
+
+  .tab-button.tools-tab.active {
+    border-color: rgba(188, 143, 255, 0.7);
+    color: #d2a8ff;
+    background: rgba(188, 143, 255, 0.15);
+  }
+
+  .tool-definition {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(214, 214, 214, 0.1);
+  }
+
+  .tool-definition:last-child {
+    border-bottom: none;
+  }
+
+  .tool-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #d2a8ff;
+    margin-bottom: 4px;
+  }
+
+  .tool-description {
+    font-size: 11px;
+    color: rgba(201, 209, 217, 0.8);
+    margin-bottom: 6px;
+  }
+
+  .tool-params {
+    font-size: 10px;
+    color: rgba(201, 209, 217, 0.6);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    border-radius: 4px;
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 </style>

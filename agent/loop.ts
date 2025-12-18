@@ -39,6 +39,17 @@ export async function clearContext() {
     context = [];
     await sendContextUpdate(context);
     await sendInspectionMessage("Context cleared");
+    
+    // Reset token usage to show "?" in the UI
+    const contextLimit = await fetchModelContextLimit(currentModel);
+    const resetTokenUsage: TokenUsage = {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        contextLimit,
+        remainingTokens: null,
+    };
+    await sendTokenUsageUpdate(resetTokenUsage);
 }
 
 export function getContext(): AgentMessage[] {
