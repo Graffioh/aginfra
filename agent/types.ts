@@ -22,6 +22,25 @@ export type AgentToolCall = {
     };
 }
 
+export type JSONSchema = {
+    type: "object" | "string" | "number" | "boolean" | "array";
+    properties?: Record<string, JSONSchema>;
+    required?: string[];
+    description?: string;
+    items?: JSONSchema;
+}
+
+export type AgentToolDefinition = {
+    type: "function";
+    function: {
+        name: string;
+        description: string;
+        parameters: JSONSchema;
+    };
+}
+
+
+
 export type InspectionEvent = {
     id: number;
     ts: number;

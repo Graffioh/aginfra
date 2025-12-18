@@ -1,8 +1,9 @@
 import { getWeather } from "./weather";
 import { getMovie } from "./film";
 import { runNeofetch } from "./neofetch";
+import type { AgentToolDefinition } from "../types";
 
-export const toolDefinitions = [
+export const toolDefinitions: AgentToolDefinition[] = [
     {
       type: "function",
       function: {

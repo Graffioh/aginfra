@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import type { TokenUsage } from "../../inspection/types";
   import type { ContextMessage } from "../../inspection/types";
+  import type { AgentToolDefinition } from "../../agent/types";
 
   let context: ContextMessage[] = $state([]);
   let tokenUsage: TokenUsage = $state({
@@ -13,7 +14,7 @@
   });
   let contextExpanded = $state(false);
   let activeTab: "context" | "tools" = $state("context");
-  let toolDefinitions: any[] = $state([]);
+  let toolDefinitions: AgentToolDefinition[] = $state([]);
   let contextEventSource: EventSource | null = null;
   let tokenEventSource: EventSource | null = null;
 

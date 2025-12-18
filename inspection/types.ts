@@ -6,8 +6,10 @@ export type TokenUsage = {
     remainingTokens: number | null;
 }
 
+import type { AgentToolCall } from "../agent/types";
+
 export type ContextMessage = {
     role: string;
     content: string;
-    tool_calls?: any[];
+    tool_calls?: AgentToolCall[];
 };
