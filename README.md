@@ -42,7 +42,7 @@ When you send SSE events to the inspector to be displayed in the Agent inspectio
     tool_calls?: unknown[]; // (optional)
   };
   ```
-- `tools` ➜ (tools: AgentToolDefinition)
+- `tools` ➜ (tools: AgentToolDefinition[])
   ```ts
   type JSONSchema = {
     type: "object" | "string" | "number" | "boolean" | "array";
