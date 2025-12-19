@@ -69,6 +69,8 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 16px;
+    box-sizing: border-box;
   }
 
   .status {

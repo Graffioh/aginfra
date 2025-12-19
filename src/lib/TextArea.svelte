@@ -6,17 +6,19 @@
 
 <style>
   .chat-display {
-    height: 80%;
+    flex: 1;
+    min-height: 0;
     resize: none;
-    font-size: 16px;
+    font-size: 15px;
     font-family: inherit;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-    margin-bottom: 10px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    color: #e6edf3;
+    margin-bottom: 0;
     white-space: normal;
-    line-height: 1.5;
+    line-height: 1.6;
     word-break: break-word;
     overflow-y: auto;
   }

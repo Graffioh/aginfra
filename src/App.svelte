@@ -11,7 +11,7 @@
 
 <main>
   <div id="panels">
-    <div id="panel-inspection" class={chatOpen ? "" : "expanded"}>
+    <div id="panel-inspection">
       <Inspection />
     </div>
     <button
@@ -45,17 +45,13 @@
   }
 
   #panel-inspection {
-    width: 50%;
-    transition: width 0.3s ease;
-    flex-shrink: 0;
-  }
-
-  #panel-inspection.expanded {
-    width: calc(100% - 50px);
+    flex: 1;
+    min-width: 0;
+    transition: all 0.3s ease;
   }
 
   #panel-chat {
-    width: 50%;
+    width: 600px;
     transition: width 0.3s ease;
     flex-shrink: 0;
   }
