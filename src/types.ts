@@ -7,9 +7,14 @@ export type InspectionEvent = {
   data: string;
   expanded: boolean;
 };
+
+export type TokenUsage = {
+  contextLimit: number | null;
+  remainingTokens: number | null;
+};
 // **********************
 
-// *** Agent types ***
+// *** Agent tool definition type ***
 export type JSONSchema = {
   type: "object" | "string" | "number" | "boolean" | "array";
   properties?: Record<string, JSONSchema>;
@@ -26,15 +31,9 @@ export type AgentToolDefinition = {
     parameters: JSONSchema;
   };
 };
+// **********************
 
-export type TokenUsage = {
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
-  contextLimit: number | null;
-  remainingTokens: number | null;
-};
-
+// *** Context message type ***
 export type ContextMessage = {
   role: string;
   content: string;

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import type {
-    JSONSchema,
     AgentToolDefinition,
     TokenUsage,
     ContextMessage,
@@ -9,9 +8,6 @@
 
   let context: ContextMessage[] = $state([]);
   let tokenUsage: TokenUsage = $state({
-    promptTokens: 0,
-    completionTokens: 0,
-    totalTokens: 0,
     contextLimit: null,
     remainingTokens: null,
   });
@@ -20,6 +16,7 @@
   let toolDefinitions: AgentToolDefinition[] = $state([]);
   let contextEventSource: EventSource | null = null;
   let tokenEventSource: EventSource | null = null;
+  let toolEventSource: EventSource | null = null;
 
   const AGENT_URL =
     import.meta.env.VITE_AGENT_URL || "http://localhost:3002/api";
@@ -85,21 +82,6 @@
     return num.toString();
   }
 
-  async function fetchToolDefinitions() {
-    try {
-      const response = await fetch(AGENT_URL + "/agent/tools", {
-        method: "GET",
-      });
-      if (response.ok) {
-        toolDefinitions = await response.json();
-      } else {
-        console.error("Failed to fetch tools");
-      }
-    } catch (error) {
-      console.error("Error fetching tools:", error);
-    }
-  }
-
   onMount(() => {
     contextEventSource = new EventSource(
       INSPECTION_URL + "/inspection/context"
@@ -135,7 +117,20 @@
       console.error("Token SSE connection error");
     };
 
-    fetchToolDefinitions();
+    toolEventSource = new EventSource(INSPECTION_URL + "/inspection/tools");
+
+    toolEventSource.onmessage = (event: MessageEvent) => {
+      try {
+        const tools = JSON.parse(event.data);
+        toolDefinitions = tools;
+      } catch (e) {
+        console.error("Failed to parse tool definitions data:", e);
+      }
+    };
+
+    toolEventSource.onerror = () => {
+      console.error("Tool definitions SSE connection error");
+    };
   });
 
   onDestroy(() => {
@@ -143,6 +138,8 @@
     contextEventSource = null;
     tokenEventSource?.close();
     tokenEventSource = null;
+    toolEventSource?.close();
+    toolEventSource = null;
   });
 </script>
 
@@ -216,14 +213,14 @@
           {#if context.length === 0}
             <div class="empty-context">No messages in context yet.</div>
           {:else}
-            {#each context as msg, idx (idx)}
+            {#each context as ctx, idx (idx)}
               <div class="context-message">
-                <div class="context-role {msg.role}">{msg.role}</div>
+                <div class="context-role {ctx.role}">{ctx.role}</div>
                 <div class="context-text">
-                  {#if msg.content}
-                    <pre>{msg.content}</pre>
-                  {:else if msg.tool_calls}
-                    <pre>{JSON.stringify(msg.tool_calls, null, 2)}</pre>
+                  {#if ctx.content}
+                    <pre>{ctx.content}</pre>
+                  {:else if ctx.tool_calls}
+                    <pre>{JSON.stringify(ctx.tool_calls, null, 2)}</pre>
                   {:else}
                     <pre>(empty)</pre>
                   {/if}
@@ -233,7 +230,7 @@
           {/if}
         {:else if activeTab === "tools"}
           {#if toolDefinitions.length === 0}
-            <div class="empty-context">No tools available.</div>
+            <div class="empty-context">No tool definition available.</div>
           {:else}
             {#each toolDefinitions as tool, idx (idx)}
               <div class="tool-definition">

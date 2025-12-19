@@ -44,6 +44,8 @@ Follow these rules strictly:
 `.trim();
 
 export async function runLoop(userInput: string) {
+    await inspectionReporter.tools(toolDefinitions);
+
     // Include system prompt in context if it's the first message
     const startContext = getContext();
     if (startContext.length === 0) {
@@ -92,7 +94,7 @@ export async function runLoop(userInput: string) {
                 remainingTokens: contextLimit !== null ? contextLimit - (data.usage.total_tokens || 0) : null,
             };
             setLastTokenUsage(tokenUsage);
-            await inspectionReporter.tokens(tokenUsage);
+            await inspectionReporter.tokens(tokenUsage.totalTokens, tokenUsage.contextLimit);
         }
 
         const msg = data.choices[0].message;

@@ -23,13 +23,46 @@ If you want (and use typescript for the agent), you can import/copy `InspectorRe
 
 If you don't use typescript, just adapt the code based on your programming language of choice.
 
-#### Types 
+#### What to pass to the inspector for reporting
 
-In your own agent loop implementation, you should adhere to a "type contract".
+When you send SSE events to the inspector to be displayed in the Agent inspection panel you must send specific constrained informations (if you don't customize the frontend):
 
-Specifically you need to follow strictly the agent type definitions present in `/src/types.ts` for some implementations (tool definitions, context message, toke usage) otherwise the inspection frontend won't work properly.
+##### Less structured
 
-You can check my agent implementation in `/agent` as a reference.
+- `message` ➜ (message: string)
+- `tokens` ➜ (currentUsage: number, maxTokens: number)
+
+##### More structured
+
+- `context` ➜ (ctx: ContextMessage[])
+  ```ts
+  type ContextMessage = {
+    role: string; // system, user, assistant
+    content: string; 
+    tool_calls?: unknown[]; // (optional)
+  };
+  ```
+- `tools` ➜ (tools: AgentToolDefinition)
+  ```ts
+  type JSONSchema = {
+    type: "object" | "string" | "number" | "boolean" | "array";
+    properties?: Record<string, JSONSchema>;
+    required?: string[];
+    description?: string;
+    items?: JSONSchema;
+  };
+
+  type AgentToolDefinition = {
+    type: "function";
+    function: {
+      name: string;
+      description: string;
+      parameters: JSONSchema;
+    };
+  };
+  ```
+
+You can check my agent implementation in `/agent` and `/reporter` as a reference.
 
 I will think of a better way for these stuffs...I promise.
 

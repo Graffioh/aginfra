@@ -11,14 +11,15 @@
  * const reporter = createHttpInspectionReporter("http://localhost:3003");
  * await reporter.message("Agent is thinking...");
  * await reporter.context(messages);
- * await reporter.tokens(usage);
+ * await reporter.tokens(currentUsage, maxTokens);
  * ```
  */
 
 type InspectionReporter = {
     message: (msg: string) => Promise<void>;
     context: (ctx: unknown[]) => Promise<void>;
-    tokens: (usage: unknown) => Promise<void>;
+    tokens: (currentUsage: number, maxTokens: number | null) => Promise<void>;
+    tools: (toolDefinitions: unknown[]) => Promise<void>;
 };
 
 /**
@@ -64,12 +65,12 @@ export function createHttpInspectionReporter(
             }
         },
 
-        async tokens(usage: unknown): Promise<void> {
+        async tokens(currentUsage: number, maxTokens: number | null): Promise<void> {
             try {
                 const response = await fetch(`${baseUrl}/api/inspection/tokens`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(usage),
+                    body: JSON.stringify({ currentUsage, maxTokens }),
                 });
 
                 if (!response.ok) {
@@ -77,6 +78,22 @@ export function createHttpInspectionReporter(
                 }
             } catch (error) {
                 console.error("Error sending token usage update:", error);
+            }
+        },
+
+        async tools(toolDefinitions: unknown[]): Promise<void> {
+            try {
+                const response = await fetch(`${baseUrl}/api/inspection/tools`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ toolDefinitions }),
+                });
+
+                if (!response.ok) {
+                    console.error(`Failed to send tool definitions: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error("Error sending tool definitions:", error);
             }
         },
     };

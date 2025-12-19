@@ -17,6 +17,10 @@ app.use(express.json());
 let inspectionClients: Response[] = [];
 let contextClients: Response[] = [];
 let tokenClients: Response[] = [];
+let toolClients: Response[] = [];
+
+// Store tool definitions
+let toolDefinitions: unknown[] = [];
 
 // Server sent events (SSE) Inspection events endpoint
 app.get("/api/inspection/messages", async (req: Request, res: Response) => {
@@ -130,11 +134,17 @@ app.get("/api/inspection/tokens", async (req: Request, res: Response) => {
 // HTTP endpoint for agent to send token usage updates
 app.post("/api/inspection/tokens", async (req: Request, res: Response) => {
   try {
-    const usage = req.body;
+    const { currentUsage, maxTokens } = req.body;
+
+    const tokenUsage = {
+      totalTokens: currentUsage,
+      contextLimit: maxTokens,
+      remainingTokens: maxTokens !== null ? maxTokens - currentUsage : null,
+    };
 
     tokenClients.forEach((client) => {
       try {
-        client.write(`data: ${JSON.stringify(usage)}\n\n`);
+        client.write(`data: ${JSON.stringify(tokenUsage)}\n\n`);
       } catch (error) {
         tokenClients = tokenClients.filter((c) => c !== client);
       }
@@ -144,6 +154,51 @@ app.post("/api/inspection/tokens", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("[ERROR] Failed to send token usage update:", error);
     res.status(500).json({ error: "Failed to send token usage update" });
+  }
+});
+
+// Server sent events (SSE) Tool definitions endpoint
+app.get("/api/inspection/tools", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  res.flushHeaders();
+
+  toolClients.push(res);
+
+  res.write(`data: ${JSON.stringify(toolDefinitions)}\n\n`);
+
+  req.on("close", () => {
+    toolClients = toolClients.filter((client) => client !== res);
+    res.end();
+    console.log("Tool definitions SSE Client disconnected");
+  });
+});
+
+// HTTP endpoint for agent to send tool definitions
+app.post("/api/inspection/tools", async (req: Request, res: Response) => {
+  try {
+    const { toolDefinitions: tools } = req.body;
+    
+    if (!Array.isArray(tools)) {
+      return res.status(400).json({ error: "Tool definitions must be an array" });
+    }
+
+    toolDefinitions = tools;
+
+    toolClients.forEach((client) => {
+      try {
+        client.write(`data: ${JSON.stringify(toolDefinitions)}\n\n`);
+      } catch (error) {
+        toolClients = toolClients.filter((c) => c !== client);
+      }
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("[ERROR] Failed to store tool definitions:", error);
+    res.status(500).json({ error: "Failed to store tool definitions" });
   }
 });
 
