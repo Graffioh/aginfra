@@ -13,9 +13,13 @@ The goal is to make the frontend and inspection backend (SSE) a standalone compo
 
 ## Usage
 
-- Start the **frontend**: npm run dev:frontend
-- Start the **inspection backend**: npm run dev:inspection
-- (Optional) Start the **agent**: npm run dev:agent
+### With Docker (frontend + inspection backend)
+
+- Start both services:
+  - `docker compose up --build`
+- Open the UI:
+  - `http://localhost:5173`
+- Connect your own agent 
 
 ### Running your own agent
 
@@ -68,6 +72,12 @@ When you send SSE events to the inspector to be displayed in the Agent inspectio
 You can check my agent implementation in `/agent` and `/reporter` as a reference.
 
 I will think of a better way for these stuffs...I promise.
+
+### Without Docker
+
+- Start the **frontend**: npm run dev:frontend
+- Start the **inspection backend**: npm run dev:inspection
+- (Optional) Start the **agent**: npm run dev:agent
 
 ## Arch & Design
 

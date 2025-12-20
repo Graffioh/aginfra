@@ -42,6 +42,7 @@
     width: 100%;
     height: 100%;
     align-items: stretch;
+    background: black;
   }
 
   #panel-inspection {
@@ -54,6 +55,7 @@
     width: 600px;
     transition: width 0.3s ease;
     flex-shrink: 0;
+    background: black;
   }
 
   #panel-chat.collapsed {
@@ -102,7 +104,7 @@
   }
 
   .chat-toggle:active {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.15);
   }
 
   .arrow {

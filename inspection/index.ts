@@ -5,8 +5,21 @@ import { Request, Response } from "express";
 
 const app = express();
 
-const corsOptions = {
-  origin: "http://localhost:5173",
+// Fixed host/port (keep stable for local usage + Docker compose).
+// Note: we still bind to 0.0.0.0 so the container port is reachable from your machine.
+const HOST = "0.0.0.0";
+const PORT = 6969;
+
+const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, cb) => {
+    // Allow same-origin / non-browser clients (no Origin header)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes("*")) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error(`CORS blocked origin: ${origin}`));
+  },
   methods: ["GET", "POST"],
 };
 
@@ -251,8 +264,8 @@ app.post("/api/inspection/model", async (req: Request, res: Response) => {
 });
 
 // Start the server
-app.listen(3003, () => {
-  console.log(`Inspection server running on http://localhost:3003`);
+app.listen(PORT, HOST, () => {
+  console.log(`Inspection server running on http://localhost:${PORT}`);
   console.log("Listening for requests...");
 });
 

@@ -16,7 +16,7 @@
   let modelEventSource: EventSource | null = null;
 
   const INSPECTION_URL =
-    import.meta.env.VITE_INSPECTION_URL || "http://localhost:3003/api";
+    import.meta.env.VITE_INSPECTION_URL || "http://localhost:6969/api";
 
   function pushEvent(data: string) {
     const next = [

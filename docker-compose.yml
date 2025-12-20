@@ -1,0 +1,37 @@
+services:
+  inspection:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    working_dir: /app
+    command: sh -lc "npm run dev:inspection"
+    ports:
+      - "6969:6969"
+    environment:
+      # More reliable file watching on Docker Desktop (macOS/Windows)
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    working_dir: /app
+    command: sh -lc "npm run dev:frontend -- --host 0.0.0.0 --port 5173 --strictPort"
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_INSPECTION_URL=http://localhost:6969/api
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      - inspection
+
+volumes:
+  node_modules:
+
+

@@ -8,7 +8,7 @@
  * ```ts
  * import { createHttpInspectionReporter } from "@you/protocol";
  *
- * const reporter = createHttpInspectionReporter("http://localhost:3003");
+ * const reporter = createHttpInspectionReporter("http://localhost:6969");
  * await reporter.message("Agent is processing...");
  * await reporter.context(messages);
  * await reporter.tokens(currentUsage, maxTokens);
@@ -26,10 +26,10 @@ type InspectionReporter = {
 /**
  * Creates an HTTP-based inspection reporter that POSTs events to the inspection server.
  *
- * @param baseUrl - The base URL of the inspection server (default: http://localhost:3003)
+ * @param baseUrl - The base URL of the inspection server (default: http://localhost:6969)
  */
 export function createHttpInspectionReporter(
-    baseUrl: string = "http://localhost:3003",
+    baseUrl: string = "http://localhost:6969",
 ): InspectionReporter {
     return {
         async message(msg: string): Promise<void> {

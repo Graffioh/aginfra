@@ -1,0 +1,15 @@
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+# Install deps first for better caching
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy the rest of the repo (dev compose bind-mount will override source, but deps stay in the volume)
+COPY . .
+
+EXPOSE 5173
+EXPOSE 6969
+
+
