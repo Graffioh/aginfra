@@ -1,14 +1,18 @@
 <script lang="ts">
   let message = $state("");
-  let { onsend } = $props();
+  let { onsend, disabled = false } = $props<{
+    onsend: (message: string) => void;
+    disabled?: boolean;
+  }>();
 </script>
 
 <div class="input-container">
   <textarea
     placeholder="Chat with the agent..."
     bind:value={message}
+    {disabled}
     onkeypress={(e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey && !disabled) {
         onsend(message);
         message = "";
         e.preventDefault();
@@ -17,9 +21,12 @@
   ></textarea>
 
   <button
+    {disabled}
     onclick={() => {
-      onsend(message);
-      message = "";
+      if (!disabled) {
+        onsend(message);
+        message = "";
+      }
     }}
   >
     Send</button
@@ -51,6 +58,11 @@
     background: rgba(255, 255, 255, 0.08);
   }
 
+  textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   button {
     align-self: flex-end;
     padding: 6px 16px;
@@ -65,5 +77,11 @@
 
   button:hover {
     background: #ffe046ca;
+  }
+
+  button:disabled {
+    background: #fbce5180;
+    color: #00000080;
+    cursor: not-allowed;
   }
 </style>

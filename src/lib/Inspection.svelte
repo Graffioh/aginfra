@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import DownloadSnapshot from "./DownloadSnapshot.svelte";
   import CurrentContext from "./CurrentContext.svelte";
   import EventRow from "./EventRow.svelte";
@@ -10,6 +10,7 @@
   let lastError = $state<string | null>(null);
   let eventId = $state(0);
   let modelName = $state<string>("");
+  let streamElement: HTMLDivElement | null = $state(null);
 
   let eventSource: EventSource | null = null;
   let modelEventSource: EventSource | null = null;
@@ -23,6 +24,12 @@
       { id: eventId++, ts: Date.now(), data, expanded: false },
     ];
     events = next.length > 300 ? next.slice(next.length - 300) : next;
+
+    tick().then(() => {
+      if (streamElement) {
+        streamElement.scrollTop = streamElement.scrollHeight;
+      }
+    });
   }
 
   function toggleExpand(eventId: number) {
@@ -98,7 +105,7 @@
     <div class="error">{lastError}</div>
   {/if}
 
-  <div class="stream">
+  <div class="stream" bind:this={streamElement}>
     {#if events.length === 0}
       <div class="empty">No inspection events yet.</div>
     {:else}

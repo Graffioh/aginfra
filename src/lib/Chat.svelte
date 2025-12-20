@@ -60,7 +60,7 @@
   {#if isSending}
     <div class="status">Thinking...</div>
   {/if}
-  <TextInput onsend={handleSend} />
+  <TextInput onsend={handleSend} disabled={isSending} />
 </div>
 
 <style>
