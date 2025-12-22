@@ -38,6 +38,7 @@ export enum InspectionEventLabel {
   Content = "Content",
   Reasoning = "Reasoning",
   ToolCalls = "Tool Calls",
+  Custom = "Custom",
 }
 
 /**
