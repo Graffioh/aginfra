@@ -3,9 +3,10 @@
   import DownloadSnapshot from "./DownloadSnapshot.svelte";
   import CurrentContext from "./CurrentContext.svelte";
   import EventRow from "./EventRow.svelte";
-  import type { InspectionEvent } from "../types";
+  import type { InspectionEventDisplay } from "../types";
+  import type { InspectionEvent } from "../../protocol/types";
 
-  let events: InspectionEvent[] = $state([]);
+  let events: InspectionEventDisplay[] = $state([]);
   let status = $state<"connecting" | "connected" | "error">("connecting");
   let lastError = $state<string | null>(null);
   let eventId = $state(0);
@@ -19,10 +20,61 @@
     import.meta.env.VITE_INSPECTION_URL || "http://localhost:6969/api";
 
   function pushEvent(data: string) {
-    const next = [
-      ...events,
-      { id: eventId++, ts: Date.now(), data, expanded: false },
-    ];
+    let inspectionEvent: InspectionEvent;
+    let displayData: string;
+
+    // Parse JSON envelope (new format) or legacy format
+    try {
+      const parsed = JSON.parse(data);
+      
+      // New envelope format: if children exists, it's a trace; otherwise it's a log
+      if (parsed && typeof parsed === "object") {
+        if (Array.isArray(parsed.children)) {
+          // Trace event: has children
+          inspectionEvent = {
+            label: parsed.label || "Trace",
+            children: parsed.children,
+          };
+          displayData = parsed.label || "Trace";
+        } else if (typeof parsed.message === "string") {
+          // Log event: has message
+          inspectionEvent = {
+            message: parsed.message,
+          };
+          displayData = parsed.message;
+        }
+        // Legacy format (backward compatibility)
+        else if (parsed.__type && Array.isArray(parsed.children)) {
+          inspectionEvent = {
+            label: parsed.label || parsed.__type,
+            children: parsed.children,
+          };
+          displayData = parsed.label || parsed.__type;
+        } else {
+          // Fallback: treat as log event
+          inspectionEvent = { message: data };
+          displayData = data;
+        }
+      } else {
+        // Not an object, treat as log event
+        inspectionEvent = { message: data };
+        displayData = data;
+      }
+    } catch {
+      // Not JSON, keep as plain string (legacy support)
+      inspectionEvent = { message: data };
+      displayData = data;
+    }
+
+    const eventData: InspectionEventDisplay = {
+      id: eventId++,
+      ts: Date.now(),
+      data: displayData,
+      expanded: false,
+      inspectionEvent,
+    };
+
+    const next = [...events, eventData];
     events = next.length > 300 ? next.slice(next.length - 300) : next;
 
     tick().then(() => {
@@ -43,7 +95,7 @@
   }
 
   onMount(() => {
-    eventSource = new EventSource(INSPECTION_URL + "/inspection/messages");
+    eventSource = new EventSource(INSPECTION_URL + "/inspection/trace");
 
     eventSource.onopen = () => {
       status = "connected";

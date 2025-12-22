@@ -38,8 +38,8 @@ let toolDefinitions: unknown[] = [];
 // Store model name
 let currentModel: string = "";
 
-// Server sent events (SSE) Inspection events endpoint
-app.get("/api/inspection/messages", async (req: Request, res: Response) => {
+// Server sent events (SSE) Inspection trace endpoint
+app.get("/api/inspection/trace", async (req: Request, res: Response) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -55,6 +55,32 @@ app.get("/api/inspection/messages", async (req: Request, res: Response) => {
     res.end();
     console.log("Inspection SSE Client disconnected");
   });
+});
+
+// HTTP endpoint for agent to send inspection trace events
+app.post("/api/inspection/trace", async (req: Request, res: Response) => {
+  try {
+    const { event } = req.body;
+    
+    if (!event) {
+      return res.status(400).json({ error: "Event is required" });
+    }
+
+    const payload = JSON.stringify(event);
+
+    inspectionClients.forEach((client) => {
+      try {
+        client.write(`data: ${payload}\n\n`);
+      } catch (error) {
+        inspectionClients = inspectionClients.filter((c) => c !== client);
+      }
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("[ERROR] Failed to send inspection message:", error);
+    res.status(500).json({ error: "Failed to send inspection message" });
+  }
 });
 
 // Server sent events (SSE) Context events endpoint
@@ -74,34 +100,6 @@ app.get("/api/inspection/context", async (req: Request, res: Response) => {
     res.end();
     console.log("Context SSE Client disconnected");
   });
-});
-
-// HTTP endpoint for agent to send inspection messages
-app.post("/api/inspection/messages", async (req: Request, res: Response) => {
-  try {
-    const { message } = req.body;
-    
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
-
-    const lines = String(message).split(/\r?\n/);
-    inspectionClients.forEach((client) => {
-      try {
-        for (const line of lines) {
-          client.write(`data: ${line}\n`);
-        }
-        client.write(`\n`);
-      } catch (error) {
-        inspectionClients = inspectionClients.filter((c) => c !== client);
-      }
-    });
-
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("[ERROR] Failed to send inspection message:", error);
-    res.status(500).json({ error: "Failed to send inspection message" });
-  }
 });
 
 // HTTP endpoint for agent to send context updates

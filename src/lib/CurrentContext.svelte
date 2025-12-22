@@ -1,10 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import type {
-    AgentToolDefinition,
-    TokenUsage,
-    ContextMessage,
-  } from "../types";
+  import type { AgentToolDefinition, ContextMessage } from "../../protocol/types";
+  import type { TokenUsage } from "../types";
 
   let context: ContextMessage[] = $state([]);
   let tokenUsage: TokenUsage = $state({
@@ -217,10 +214,10 @@
               <div class="context-message">
                 <div class="context-role {ctx.role}">{ctx.role}</div>
                 <div class="context-text">
-                  {#if ctx.content}
-                    <pre>{ctx.content}</pre>
-                  {:else if ctx.tool_calls}
+                  {#if "tool_calls" in ctx && ctx.tool_calls}
                     <pre>{JSON.stringify(ctx.tool_calls, null, 2)}</pre>
+                  {:else if "content" in ctx && ctx.content}
+                    <pre>{ctx.content}</pre>
                   {:else}
                     <pre>(empty)</pre>
                   {/if}

@@ -6,20 +6,26 @@
  *
  * Usage:
  * ```ts
- * import { createHttpInspectionReporter } from "@you/protocol";
+ * import { createHttpInspectionReporter } from "./reporter";
  *
  * const reporter = createHttpInspectionReporter("http://localhost:6969");
- * await reporter.message("Agent is processing...");
+ * await reporter.trace("Agent is processing...");
+ * await reporter.trace("Model decision", [
+ *   { label: "Reasoning", data: "..." },
+ *   { label: "Content", data: "..." }
+ * ]);
  * await reporter.context(messages);
  * await reporter.tokens(currentUsage, maxTokens);
  * ```
  */
 
+import type { InspectionEvent, ContextMessage, AgentToolDefinition } from "../protocol/types";
+
 type InspectionReporter = {
-    message: (msg: string) => Promise<void>;
-    context: (ctx: unknown[]) => Promise<void>;
+    trace: (label: string, children?: Array<{ label: string; data: string }>) => Promise<void>;
+    context: (ctx: ContextMessage[]) => Promise<void>;
     tokens: (currentUsage: number, maxTokens: number | null) => Promise<void>;
-    tools: (toolDefinitions: unknown[]) => Promise<void>;
+    tools: (toolDefinitions: AgentToolDefinition[]) => Promise<void>;
     model: (modelName: string) => Promise<void>;
 };
 
@@ -32,24 +38,28 @@ export function createHttpInspectionReporter(
     baseUrl: string = "http://localhost:6969",
 ): InspectionReporter {
     return {
-        async message(msg: string): Promise<void> {
-            console.log("Sending inspection message:", msg);
+        async trace(label: string, children?: Array<{ label: string; data: string }>): Promise<void> {
+            console.log("Sending inspection trace:", label);
             try {
-                const response = await fetch(`${baseUrl}/api/inspection/messages`, {
+                // If children provided, it's a trace event; otherwise it's a log event
+                const event: InspectionEvent = children 
+                    ? { label, children }
+                    : { message: label };
+                const response = await fetch(`${baseUrl}/api/inspection/trace`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: msg }),
+                    body: JSON.stringify({ event }),
                 });
 
                 if (!response.ok) {
-                    console.error(`Failed to send inspection message: ${response.statusText}`);
+                    console.error(`Failed to send inspection trace: ${response.statusText}`);
                 }
             } catch (error) {
-                console.error("Error sending inspection message:", error);
+                console.error("Error sending inspection trace:", error);
             }
         },
 
-        async context(ctx: unknown[]): Promise<void> {
+        async context(ctx: ContextMessage[]): Promise<void> {
             console.log("Sending context update:", JSON.stringify(ctx));
             try {
                 const response = await fetch(`${baseUrl}/api/inspection/context`, {
@@ -82,7 +92,7 @@ export function createHttpInspectionReporter(
             }
         },
 
-        async tools(toolDefinitions: unknown[]): Promise<void> {
+        async tools(toolDefinitions: AgentToolDefinition[]): Promise<void> {
             try {
                 const response = await fetch(`${baseUrl}/api/inspection/tools`, {
                     method: "POST",

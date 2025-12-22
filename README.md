@@ -34,54 +34,39 @@ If you don't use typescript, just adapt the code based on your programming langu
 
 When you send SSE events to the inspector to be displayed in the Agent inspection panel you must send specific constrained informations (if you don't customize the frontend):
 
-##### Less structured
+##### Trace
 
-- `message` ➜ (message: string)
+You can send structured trace events with reasoning details using the `trace()` method:
+
+```ts
+import { createHttpInspectionReporter } from "./reporter";
+
+const reporter = createHttpInspectionReporter();
+
+// Send a trace event with reasoning
+await reporter.trace(
+    "Final Assistant message",
+    [
+        { label: "Reasoning", data: reasoning },
+        { label: "Content", data: finalContent }
+    ]
+);
+```
+
+The `trace()` method sends events with a parent/child structure that will be displayed with expandable reasoning details in the UI. The reasoning label will be highlighted in orange to distinguish it from other content (if provided).
+
+If it doesn't contain a parent / children structure, it will be displayed as plain text.
+
+##### Others
+
 - `tokens` ➜ (currentTokensUsage: number, modelContextLimit: number) 
 - `model` ➜ (modelName: string)
-
-##### More structured
-
 - `context` ➜ (ctx: ContextMessage[])
-  ```ts
-  type AgentToolCall = {
-      id: string;
-      type: "function";
-      function: {
-          name: string;
-          arguments: string;
-      };
-  };
-
-  type ContextMessage = {
-    role: string; // system, user, assistant
-    content: string; 
-    tool_calls?: AgentToolCall[]; 
-  };
-  ```
 - `tools` ➜ (tools: AgentToolDefinition[])
-  ```ts
-  type JSONSchema = {
-    type: "object" | "string" | "number" | "boolean" | "array";
-    properties?: Record<string, JSONSchema>;
-    required?: string[];
-    description?: string;
-    items?: JSONSchema;
-  };
 
-  type AgentToolDefinition = {
-    type: "function";
-    function: {
-      name: string;
-      description: string;
-      parameters: JSONSchema;
-    };
-  };
-  ```
+All protocol types are available in `protocol/types.ts`.
 
-You can check my agent implementation in `/agent` and `/reporter` as a reference.
-
-I will think of a better way for these stuffs...I promise.
+You can check the agent implementation in `/agent` and `/reporter` as a reference. 
 
 ### Without Docker
 

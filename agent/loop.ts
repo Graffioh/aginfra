@@ -1,4 +1,5 @@
-import type { AgentMessage, AgentToolCall, TokenUsage } from "./types";
+import type { AgentMessage } from "./types";
+import type { AgentToolCall, TokenUsage } from "../protocol/types";
 import { toolDefinitions, toolImplementations } from "./tools/base";
 import { createHttpInspectionReporter } from "../reporter/index";
 import {
@@ -59,7 +60,7 @@ export async function runLoop(userInput: string) {
         const currentContext = getContext();
         const messages: AgentMessage[] = currentContext;
 
-        await inspectionReporter.message(`Agent is processing the user input...`);
+        await inspectionReporter.trace(`Agent is processing the user input...`);
 
         const response = await fetch(OPENROUTER_API_URL, {
             method: "POST",
@@ -82,7 +83,7 @@ export async function runLoop(userInput: string) {
         }
 
         const data = await response.json();
-        await inspectionReporter.message(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
+        await inspectionReporter.trace(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
 
         // Extract and send token usage
         if (data.usage) {
@@ -99,12 +100,27 @@ export async function runLoop(userInput: string) {
         }
 
         const msg = data.choices[0].message;
-        await inspectionReporter.message(`Model message: ${JSON.stringify(msg, null, 2)}`);
+        await inspectionReporter.trace(`Model message: ${JSON.stringify(msg, null, 2)}`);
 
-        const toolCalls: AgentToolCall[] = msg.tool_calls;
+        const { tool_calls: toolCalls, reasoning } = msg;
 
         if (toolCalls && toolCalls.length > 0) {
-            await inspectionReporter.message(`Model decided to use TOOLS: ${toolCalls.map(call => call.function.name).join(", ")}`);
+            const toolNames = toolCalls.map((call: AgentToolCall) => call.function.name).join(", ");
+            const toolCount = toolCalls.length;
+            const toolText = toolCount === 1 ? "tool" : "tools";
+            
+            // Emit structured event (in this case, with reasoning if present)
+            if (reasoning) {
+                await inspectionReporter.trace(
+                    `Agent executing ${toolCount} ${toolText}: ${toolNames}`,
+                    [
+                        { label: "Reasoning", data: reasoning },
+                        { label: "Tool Calls", data: JSON.stringify(toolCalls, null, 2) }
+                    ]
+                );
+            } else {
+                await inspectionReporter.trace(`Agent executing ${toolCount} ${toolText}: ${toolNames}`);
+            }
 
             await updateContext({
                 role: "assistant",
@@ -112,13 +128,10 @@ export async function runLoop(userInput: string) {
                 tool_calls: toolCalls
             });
 
-            // Call all tools one by one based on agent reasoning
+            // Call all tools one by one
             for (const call of toolCalls) {
                 const toolName = call.function.name;
-                const toolDescription = toolDefinitions.find(t => t.function.name === toolName)?.function.description;
                 const args = JSON.parse(call.function.arguments || "{}");
-
-                await inspectionReporter.message(`Tool call → ${toolName} \n\n with arguments: ${JSON.stringify(args, null, 2)} \n\n Description: ${toolDescription}`);
 
                 if (!toolImplementations[toolName]) {
                     throw new Error(`Unknown tool: ${toolName}`);
@@ -137,9 +150,24 @@ export async function runLoop(userInput: string) {
         }
 
         const finalContent = msg.content ? msg.content : `The agent is confused x.x`;
-        await inspectionReporter.message(`Final Assistant message: ${finalContent}`);
+        
+        // Emit structured event with reasoning if present
+        if (reasoning) {
+            await inspectionReporter.trace(
+                "Final Assistant message",
+                [
+                    { label: "Reasoning", data: reasoning },
+                    { label: "Content", data: finalContent }
+                ]
+            );
+        } else {
+            await inspectionReporter.trace(`Final Assistant message: ${finalContent}`);
+        }
 
-        await updateContext({ role: "assistant", content: msg.content });
+        await updateContext({
+            role: "assistant",
+            content: msg.content
+        });
 
         return finalContent;
     }

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { InspectionEvent } from "../types";
+  import type { InspectionEventDisplay } from "../types";
 
   interface Props {
-    events: InspectionEvent[];
+    events: InspectionEventDisplay[];
   }
 
   let { events }: Props = $props();
@@ -14,7 +14,8 @@
     return events
       .map((e) => {
         const timestamp = new Date(e.ts).toLocaleString();
-        return `[${timestamp}] ${e.data}`;
+        const displayText = e.inspectionEvent.label || e.inspectionEvent.message || e.data;
+        return `[${timestamp}] ${displayText}`;
       })
       .join("\n");
   }

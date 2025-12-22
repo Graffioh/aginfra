@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { InspectionEvent } from "../types";
+  import type { InspectionEventDisplay } from "../types";
 
   interface Props {
-    event: InspectionEvent;
+    event: InspectionEventDisplay;
     onToggleExpand: (eventId: number) => void;
     onRemove: (eventId: number) => void;
   }
@@ -14,7 +14,11 @@
   }
 
   const isExpanded = $derived(!!event.expanded);
-  const multiline = $derived(event.data.includes("\n"));
+  const hasChildren = $derived(!!event.inspectionEvent.children && event.inspectionEvent.children.length > 0);
+  const multiline = $derived(event.data.includes("\n") || hasChildren);
+  const hasReasoning = $derived(
+    hasChildren && event.inspectionEvent.children?.some((child) => child.label.includes("Reasoning"))
+  );
 </script>
 
 <div class="row">
@@ -25,9 +29,26 @@
         <span class="arrow {isExpanded ? 'expanded' : ''}">▶</span>
       </button>
     {/if}
-    <pre class="data {isExpanded ? '' : 'collapsed'}">{isExpanded || !multiline
-        ? event.data
-        : getFirstLine(event.data)}</pre>
+    <div class="data-content">
+      <div class="data-with-badge">
+        <pre class="data {isExpanded ? '' : 'collapsed'}">{isExpanded || !multiline
+            ? event.data
+            : getFirstLine(event.data)}</pre>
+        {#if hasReasoning}
+          <span class="reasoning-badge" title="Contains reasoning details">R</span>
+        {/if}
+      </div>
+      {#if isExpanded && hasChildren}
+        <div class="children {hasReasoning ? 'has-reasoning' : ''}">
+          {#each event.inspectionEvent.children as child}
+            <div class="child">
+              <div class="child-label {child.label.includes('Reasoning') ? 'reasoning-label' : ''}">{child.label}</div>
+              <pre class="child-data">{child.data}</pre>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
   <div class="remove-container">
     <button
@@ -92,13 +113,79 @@
     white-space: pre-wrap;
     word-break: break-word;
     color: #e6edf3;
-    flex: 1;
   }
 
   .data.collapsed {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
+  }
+
+  .data-content {
+    flex: 1;
+  }
+
+  .data-with-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .reasoning-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 149, 0, 0.15);
+    color: #ff9500;
+    border: 1px solid rgba(255, 149, 0, 0.3);
+    line-height: 1;
+    margin-top: 2px;
+    cursor: help;
+  }
+
+  .children {
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 2px solid rgba(88, 166, 255, 0.3);
+  }
+
+  .children.has-reasoning {
+    border-left-color: rgba(255, 149, 0, 0.3);
+  }
+
+  .child {
+    margin-bottom: 12px;
+  }
+
+  .child:last-child {
+    margin-bottom: 0;
+  }
+
+  .child-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #79c0ff;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .child-label.reasoning-label {
+    color: #ff9500;
+  }
+
+  .child-data {
+    margin: 0;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: rgba(230, 237, 243, 0.9);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .remove-container {

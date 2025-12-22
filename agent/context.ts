@@ -1,4 +1,5 @@
-import type { AgentMessage, TokenUsage } from "./types";
+import type { AgentMessage } from "./types";
+import type { TokenUsage, ContextMessage } from "../protocol/types";
 import { createHttpInspectionReporter } from "../reporter/index";
 
 const inspectionReporter = createHttpInspectionReporter();
@@ -38,13 +39,18 @@ export async function fetchModelContextLimit(model: string): Promise<number | nu
 
 export async function updateContext(newMessage: AgentMessage) {
     context.push(newMessage);
-    await inspectionReporter.context(context);
+    // Convert to ContextMessage[] (excluding reasoning) for inspection
+    const contextForInspection: ContextMessage[] = context.map((msg) => {
+        const { reasoning, ...rest } = msg;
+        return rest as ContextMessage;
+    });
+    await inspectionReporter.context(contextForInspection);
 }
 
 export async function clearContext(currentModel: string) {
     context = [];
-    await inspectionReporter.context(context);
-    await inspectionReporter.message("Context cleared");
+    await inspectionReporter.context([]);
+    await inspectionReporter.trace("Context cleared");
     
     // Reset token usage to show "?" in the UI
     const contextLimit = await fetchModelContextLimit(currentModel);
