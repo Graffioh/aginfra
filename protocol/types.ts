@@ -30,21 +30,32 @@ export type ContextMessage = {
 };
 
 /**
+ * Important labels for inspection event children
+ * These are standardized labels used by the frontend for special handling
+ * All labels MUST use this enum - no arbitrary strings allowed
+ */
+export enum InspectionEventLabel {
+  Content = "Content",
+  Reasoning = "Reasoning",
+  ToolCalls = "Tool Calls",
+}
+
+/**
  * Child data for structured inspection events
  */
 export type InspectionEventChild = {
-  label: string;
+  label: InspectionEventLabel;
   data: string;
 };
 
 /**
  * Inspection event - structured format for inspection messages
- * If children is present, it's a trace event (use label).
- * If children is absent, it's a log event (use message).
+ * Parent event uses message (string), children use label (InspectionEventLabel enum).
+ * If children is present, it's a trace event with structured children.
+ * If children is absent, it's a log event with just a message.
  */
 export type InspectionEvent = {
-  label?: string;
-  message?: string;
+  message: string;
   children?: InspectionEventChild[];
 };
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { InspectionEventDisplay } from "../types";
+  import { InspectionEventLabel } from "../../protocol/types";
 
   interface Props {
     event: InspectionEventDisplay;
@@ -17,7 +18,7 @@
   const hasChildren = $derived(!!event.inspectionEvent.children && event.inspectionEvent.children.length > 0);
   const multiline = $derived(event.data.includes("\n") || hasChildren);
   const hasReasoning = $derived(
-    hasChildren && event.inspectionEvent.children?.some((child) => child.label.includes("Reasoning"))
+    hasChildren && event.inspectionEvent.children?.some((child) => child.label === InspectionEventLabel.Reasoning)
   );
 </script>
 
@@ -42,7 +43,7 @@
         <div class="children {hasReasoning ? 'has-reasoning' : ''}">
           {#each event.inspectionEvent.children as child}
             <div class="child">
-              <div class="child-label {child.label.includes('Reasoning') ? 'reasoning-label' : ''}">{child.label}</div>
+              <div class="child-label {child.label === InspectionEventLabel.Reasoning ? 'reasoning-label' : ''}">{child.label}</div>
               <pre class="child-data">{child.data}</pre>
             </div>
           {/each}

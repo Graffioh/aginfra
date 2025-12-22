@@ -7,12 +7,13 @@
  * Usage:
  * ```ts
  * import { createHttpInspectionReporter } from "./reporter";
+ * import { InspectionEventLabel } from "../protocol/types";
  *
  * const reporter = createHttpInspectionReporter("http://localhost:6969");
  * await reporter.trace("Agent is processing...");
  * await reporter.trace("Model decision", [
- *   { label: "Reasoning", data: "..." },
- *   { label: "Content", data: "..." }
+ *   { label: InspectionEventLabel.Reasoning, data: "..." },
+ *   { label: InspectionEventLabel.Content, data: "..." }
  * ]);
  * await reporter.context(messages);
  * await reporter.tokens(currentUsage, maxTokens);
@@ -20,9 +21,10 @@
  */
 
 import type { InspectionEvent, ContextMessage, AgentToolDefinition } from "../protocol/types";
+import type { InspectionEventLabel } from "../protocol/types";
 
 type InspectionReporter = {
-    trace: (label: string, children?: Array<{ label: string; data: string }>) => Promise<void>;
+    trace: (message: string, children?: Array<{ label: InspectionEventLabel; data: string }>) => Promise<void>;
     context: (ctx: ContextMessage[]) => Promise<void>;
     tokens: (currentUsage: number, maxTokens: number | null) => Promise<void>;
     tools: (toolDefinitions: AgentToolDefinition[]) => Promise<void>;
@@ -38,13 +40,13 @@ export function createHttpInspectionReporter(
     baseUrl: string = "http://localhost:6969",
 ): InspectionReporter {
     return {
-        async trace(label: string, children?: Array<{ label: string; data: string }>): Promise<void> {
-            console.log("Sending inspection trace:", label);
+        async trace(message: string, children?: Array<{ label: InspectionEventLabel; data: string }>): Promise<void> {
+            console.log("Sending inspection trace:", message);
             try {
                 // If children provided, it's a trace event; otherwise it's a log event
                 const event: InspectionEvent = children 
-                    ? { label, children }
-                    : { message: label };
+                    ? { message, children }
+                    : { message };
                 const response = await fetch(`${baseUrl}/api/inspection/trace`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

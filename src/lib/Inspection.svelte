@@ -23,33 +23,24 @@
     let inspectionEvent: InspectionEvent;
     let displayData: string;
 
-    // Parse JSON envelope (new format) or legacy format
     try {
       const parsed = JSON.parse(data);
       
-      // New envelope format: if children exists, it's a trace; otherwise it's a log
+      // if children exists, it's a structured trace; otherwise it's a log
       if (parsed && typeof parsed === "object") {
         if (Array.isArray(parsed.children)) {
-          // Trace event: has children
+          // Trace event: has children 
           inspectionEvent = {
-            label: parsed.label || "Trace",
-            children: parsed.children,
+            message: parsed.message || "No message",
+            children: parsed.children as InspectionEvent["children"],
           };
-          displayData = parsed.label || "Trace";
+          displayData = parsed.message || "No message";
         } else if (typeof parsed.message === "string") {
           // Log event: has message
           inspectionEvent = {
             message: parsed.message,
           };
           displayData = parsed.message;
-        }
-        // Legacy format (backward compatibility)
-        else if (parsed.__type && Array.isArray(parsed.children)) {
-          inspectionEvent = {
-            label: parsed.label || parsed.__type,
-            children: parsed.children,
-          };
-          displayData = parsed.label || parsed.__type;
         } else {
           // Fallback: treat as log event
           inspectionEvent = { message: data };
@@ -61,7 +52,6 @@
         displayData = data;
       }
     } catch {
-      // Not JSON, keep as plain string (legacy support)
       inspectionEvent = { message: data };
       displayData = data;
     }

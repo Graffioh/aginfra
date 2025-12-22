@@ -40,6 +40,7 @@ You can send structured trace events with reasoning details using the `trace()` 
 
 ```ts
 import { createHttpInspectionReporter } from "./reporter";
+import { InspectionEventLabel } from "./protocol/types";
 
 const reporter = createHttpInspectionReporter();
 
@@ -47,8 +48,8 @@ const reporter = createHttpInspectionReporter();
 await reporter.trace(
     "Final Assistant message",
     [
-        { label: "Reasoning", data: reasoning },
-        { label: "Content", data: finalContent }
+        { label: InspectionEventLabel.Reasoning, data: reasoning },
+        { label: InspectionEventLabel.Content, data: finalContent }
     ]
 );
 ```

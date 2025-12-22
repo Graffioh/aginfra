@@ -1,5 +1,6 @@
 import type { AgentMessage } from "./types";
 import type { AgentToolCall, TokenUsage } from "../protocol/types";
+import { InspectionEventLabel } from "../protocol/types";
 import { toolDefinitions, toolImplementations } from "./tools/base";
 import { createHttpInspectionReporter } from "../reporter/index";
 import {
@@ -114,8 +115,8 @@ export async function runLoop(userInput: string) {
                 await inspectionReporter.trace(
                     `Agent executing ${toolCount} ${toolText}: ${toolNames}`,
                     [
-                        { label: "Reasoning", data: reasoning },
-                        { label: "Tool Calls", data: JSON.stringify(toolCalls, null, 2) }
+                        { label: InspectionEventLabel.Reasoning, data: reasoning },
+                        { label: InspectionEventLabel.ToolCalls, data: JSON.stringify(toolCalls, null, 2) }
                     ]
                 );
             } else {
@@ -156,8 +157,8 @@ export async function runLoop(userInput: string) {
             await inspectionReporter.trace(
                 "Final Assistant message",
                 [
-                    { label: "Reasoning", data: reasoning },
-                    { label: "Content", data: finalContent }
+                    { label: InspectionEventLabel.Reasoning, data: reasoning },
+                    { label: InspectionEventLabel.Content, data: finalContent }
                 ]
             );
         } else {
