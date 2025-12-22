@@ -1,4 +1,4 @@
-# maid Agent package
+# maid Dummy agent package
 
 Custom agent used to test the frontend & inspection package.
 

@@ -2,7 +2,10 @@
   let { text }: { text: string } = $props();
 </script>
 
-<div class="chat-display">{@html text}</div>
+<div class="chat-display">
+  <div class="placeholder-text">Optional panel used for development</div>
+  <div class="chat-content">{@html text}</div>
+</div>
 
 <style>
   .chat-display {
@@ -21,5 +24,23 @@
     line-height: 1.6;
     word-break: break-word;
     overflow-y: auto;
+    position: relative;
+  }
+
+  .placeholder-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #666;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  .chat-content {
+    position: relative;
+    z-index: 1;
   }
 </style>

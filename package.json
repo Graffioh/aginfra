@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:frontend": "vite",
-    "dev:agent": "tsx watch agent/index.ts",
+    "dev:agent": "tsx watch dummy-agent/index.ts",
     "dev:inspection": "tsx watch inspection/index.ts"
   },
   "devDependencies": {

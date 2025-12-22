@@ -51,6 +51,17 @@ export type ContextMessage = {
 };
 
 /**
+ * Token usage information
+ */
+export type TokenUsage = {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  contextLimit: number | null;
+  remainingTokens: number | null;
+};
+
+/**
  * Inspection event (with structured format for inspection messages)
  * Parent event uses message (string), children use label (InspectionEventLabel enum).
  * If children is present, it's a trace event with structured children.
@@ -72,15 +83,3 @@ export type InspectionEvent = {
   message: string;
   children?: InspectionEventChild[];
 };
-
-/**
- * Token usage information
- */
-export type TokenUsage = {
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
-  contextLimit: number | null;
-  remainingTokens: number | null;
-};
-

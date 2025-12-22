@@ -18,7 +18,7 @@ my agent is dumb (maid) is a dev tool to inspect your agent behavior via agent s
 - Open the UI:
   - `http://localhost:5173`
 - Connect your own agent 
-  - or if you want to understand how the dev tool works, spin up the one in `/agent`
+  - or if you want to understand how the dev tool works, spin up the one in `/dummy-agent`
 
 ### Without Docker
 
@@ -71,7 +71,7 @@ If it doesn't contain a parent / children structure, it will be displayed as pla
 
 All protocol types are available in `protocol/types.ts`.
 
-You can check the agent implementation in `/agent` and `/reporter` as a reference. 
+You can check the agent implementation in `/dummy-agent` and `/reporter` as a reference. 
 
 ## Artifacts
 
