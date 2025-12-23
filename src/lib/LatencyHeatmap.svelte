@@ -14,6 +14,9 @@
 
   let { events, onSelectEvent }: Props = $props();
 
+  // Track selected bar index
+  let selectedIndex = $state<number | null>(null);
+
   // Only compute latencies if loop markers are present
   const hasMarkers = $derived(hasLoopMarkers(events));
   const latencies = $derived(hasMarkers ? computeLatencies(events) : []);
@@ -26,31 +29,45 @@
     latencies.map((latency) => getLatencyIntensity(latency, maxLatency))
   );
 
-  // Get color for intensity (green -> yellow -> red)
-  function getColor(intensity: number): string {
+  // Get border and background colors for intensity (green -> yellow -> red)
+  function getColors(intensity: number): { border: string; hoverBg: string; selectedBg: string } {
     if (intensity === 0) {
-      return "rgba(230, 237, 243, 0.15)"; // Very light gray for zero latency
+      return {
+        border: "rgba(230, 237, 243, 0.3)",
+        hoverBg: "rgba(230, 237, 243, 0.1)",
+        selectedBg: "rgba(230, 237, 243, 0.15)",
+      };
     }
 
     // Color scale: green (low) -> yellow (medium) -> red (high)
-    // Using colors that work well on dark background
     if (intensity < 0.5) {
       // Green to yellow
       const ratio = intensity / 0.5;
       const r = Math.round(46 + (255 - 46) * ratio);
       const g = Math.round(160 + (212 - 160) * ratio);
       const b = Math.round(67);
-      const alpha = 0.4 + ratio * 0.4;
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      return {
+        border: `rgba(${r}, ${g}, ${b}, ${0.5 + ratio * 0.3})`,
+        hoverBg: `rgba(${r}, ${g}, ${b}, ${0.1 + ratio * 0.1})`,
+        selectedBg: `rgba(${r}, ${g}, ${b}, ${0.15 + ratio * 0.15})`,
+      };
     } else {
       // Yellow to red
       const ratio = (intensity - 0.5) / 0.5;
       const r = Math.round(255);
       const g = Math.round(212 - 140 * ratio);
       const b = Math.round(0);
-      const alpha = 0.8 + ratio * 0.2;
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      return {
+        border: `rgba(${r}, ${g}, ${b}, ${0.8 + ratio * 0.2})`,
+        hoverBg: `rgba(${r}, ${g}, ${b}, ${0.2 + ratio * 0.1})`,
+        selectedBg: `rgba(${r}, ${g}, ${b}, ${0.3 + ratio * 0.2})`,
+      };
     }
+  }
+
+  function handleSelect(index: number) {
+    selectedIndex = index;
+    onSelectEvent?.(index);
   }
 </script>
 
@@ -71,10 +88,12 @@
     <div class="heatmap-bars">
       {#each latencies as latency, index}
         {@const intensity = intensities[index]}
-        {@const color = getColor(intensity)}
+        {@const colors = getColors(intensity)}
+        {@const isSelected = selectedIndex === index}
         <div
           class="heatmap-bar"
-          style="background-color: {color}; height: {Math.max(
+          class:selected={isSelected}
+          style="border-color: {colors.border}; --hover-bg: {colors.hoverBg}; --selected-bg: {colors.selectedBg}; height: {Math.max(
             20,
             intensity * 50 + 20
           )}px;"
@@ -82,11 +101,12 @@
           role="button"
           tabindex="0"
           aria-label="Step {index + 1}, latency {formatLatency(latency)}"
-          onclick={() => onSelectEvent?.(index)}
+          aria-pressed={isSelected}
+          onclick={() => handleSelect(index)}
           onkeydown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              onSelectEvent?.(index);
+              handleSelect(index);
             }
           }}
         >
@@ -168,19 +188,23 @@
     min-width: 8px;
     border-radius: 2px;
     cursor: pointer;
-    transition:
-      opacity 0.2s,
-      transform 0.1s;
+    transition: all 0.2s;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    background: none;
+    border: 1px solid;
   }
 
-  .heatmap-bar:hover {
-    opacity: 0.9;
-    transform: scaleY(1.05);
+  .heatmap-bar:hover:not(.selected) {
+    background-color: var(--hover-bg);
+    z-index: 1;
+  }
+
+  .heatmap-bar.selected {
+    background-color: var(--selected-bg);
     z-index: 1;
   }
 
@@ -193,24 +217,21 @@
     font-size: 9px;
     font-weight: 600;
     font-family: monospace;
-    opacity: 0.95;
+    opacity: 0.8;
     transition: opacity 0.2s;
     pointer-events: none;
     text-align: center;
     line-height: 1;
     padding: 1px 2px;
-    /* Use text shadow for better readability on colored backgrounds */
-    text-shadow:
-      0 0 2px rgba(0, 0, 0, 0.8),
-      0 0 4px rgba(0, 0, 0, 0.6);
-    color: #ffffff;
+    color: #e6edf3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
   }
 
-  .heatmap-bar:hover .heatmap-bar-label {
+  .heatmap-bar:hover .heatmap-bar-label,
+  .heatmap-bar.selected .heatmap-bar-label {
     opacity: 1;
   }
 

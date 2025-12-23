@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import CurrentContext from "./CurrentContext.svelte";
   import InspectionHeader from "./InspectionHeader.svelte";
   import InspectionStream from "./InspectionStream.svelte";
