@@ -181,12 +181,14 @@
     min-height: 40px;
     margin-bottom: 8px;
     flex-wrap: wrap;
+    border-bottom: 1px solid rgba(230, 237, 243, 0.3);
+    padding-bottom: 0;
   }
 
   .heatmap-bar {
     flex: 1;
     min-width: 8px;
-    border-radius: 2px;
+    border-radius: 2px 2px 0 0;
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
@@ -196,6 +198,7 @@
     overflow: hidden;
     background: none;
     border: 1px solid;
+    border-bottom: none;
   }
 
   .heatmap-bar:hover:not(.selected) {
