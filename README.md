@@ -120,11 +120,16 @@ You can check the agent implementation in `/dummy-agent` and `/reporter` as a re
 
 ### Visual
 
-<img width="1512" height="881" alt="Screenshot 2025-12-23 at 14 12 19" src="https://github.com/user-attachments/assets/75a13c88-3ee3-4518-8d39-e3df25395fd7" />
+<img width="1512" height="880" alt="maid-n-screen" src="https://github.com/user-attachments/assets/e4eee168-de7d-4b8e-ac79-47752119e72d" />
+
 
 ### Demo
 
-https://github.com/user-attachments/assets/440969ef-31b1-46b5-ad8b-85e0ba0d3c1f
+
+
+https://github.com/user-attachments/assets/f2bd3b6d-2693-4654-b7d2-93718bb088eb
+
+
 
 
 
