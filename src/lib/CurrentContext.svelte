@@ -18,6 +18,20 @@
   let tokenEventSource: EventSource | null = null;
   let toolEventSource: EventSource | null = null;
 
+  // Count tool calls per tool name
+  const toolCallCounts = $derived(() => {
+    const counts: Record<string, number> = {};
+    for (const msg of context) {
+      if ("tool_calls" in msg && msg.tool_calls) {
+        for (const toolCall of msg.tool_calls) {
+          const toolName = toolCall.function.name;
+          counts[toolName] = (counts[toolName] || 0) + 1;
+        }
+      }
+    }
+    return counts;
+  });
+
   const AGENT_URL =
     import.meta.env.VITE_AGENT_URL || "http://localhost:3002/api";
   const INSPECTION_URL =
@@ -234,7 +248,17 @@
           {:else}
             {#each toolDefinitions as tool, idx (idx)}
               <div class="tool-definition">
-                <div class="tool-name">{tool.function.name}</div>
+                <div class="tool-name-container">
+                  <div class="tool-name">{tool.function.name}</div>
+                  {#if toolCallCounts()[tool.function.name]}
+                    <span
+                      class="tool-call-count"
+                      title="Number of times this tool has been called"
+                    >
+                      ({toolCallCounts()[tool.function.name]} calls)
+                    </span>
+                  {/if}
+                </div>
                 <div class="tool-description">{tool.function.description}</div>
                 <pre class="tool-params">{JSON.stringify(
                     tool.function.parameters,
@@ -500,11 +524,26 @@
     border-bottom: none;
   }
 
+  .tool-name-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
   .tool-name {
     font-size: 12px;
     font-weight: 600;
     color: #d2a8ff;
-    margin-bottom: 4px;
+  }
+
+  .tool-call-count {
+    font-size: 11px;
+    color: rgba(201, 209, 217, 0.7);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
   }
 
   .tool-description {

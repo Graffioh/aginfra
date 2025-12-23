@@ -24,11 +24,11 @@
 
     try {
       const parsed = JSON.parse(data);
-      
+
       // if children exists, it's a structured trace; otherwise it's a log
       if (parsed && typeof parsed === "object") {
         if (Array.isArray(parsed.children)) {
-          // Trace event: has children 
+          // Trace event: has children
           inspectionEvent = {
             message: parsed.message || "No message",
             children: parsed.children as InspectionEvent["children"],
@@ -194,4 +194,3 @@
     text-decoration: underline;
   }
 </style>
-
