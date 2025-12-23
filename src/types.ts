@@ -8,6 +8,7 @@ export type InspectionEventDisplay = {
   ts: number;
   data: string;
   expanded: boolean;
+  warningMarked: boolean;
   inspectionEvent: InspectionEvent;
 };
 

@@ -6,9 +6,10 @@
     event: InspectionEventDisplay;
     onToggleExpand: (eventId: number) => void;
     onRemove: (eventId: number) => void;
+    onToggleWarningMark: (eventId: number) => void;
   }
 
-  let { event, onToggleExpand, onRemove }: Props = $props();
+  let { event, onToggleExpand, onRemove, onToggleWarningMark }: Props = $props();
 
   function getFirstLine(data: string): string {
     return data.split("\n")[0];
@@ -86,6 +87,13 @@
     </div>
   </div>
   <div class="remove-container">
+    <button
+      class="warning-mark-button {event.warningMarked ? 'warning-marked' : ''}"
+      onclick={() => onToggleWarningMark(event.id)}
+      title={event.warningMarked ? "Remove warning mark" : "Add warning mark"}
+    >
+      ⚠
+    </button>
     <button
       class="remove-button"
       onclick={() => onRemove(event.id)}
@@ -246,6 +254,41 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .warning-mark-button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: rgba(230, 237, 243, 0.65);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+  }
+
+  .warning-mark-button:hover {
+    border-color: rgba(255, 212, 0, 0.7);
+    color: #ffd400;
+    background: rgba(255, 212, 0, 0.1);
+  }
+
+  .warning-mark-button.warning-marked {
+    border-color: rgba(255, 212, 0, 0.5);
+    color: #ffd400;
+    background: rgba(255, 212, 0, 0.15);
+  }
+
+  .warning-mark-button.warning-marked:hover {
+    border-color: rgba(255, 212, 0, 0.8);
+    background: rgba(255, 212, 0, 0.25);
   }
 
   .remove-button {

@@ -7,10 +7,11 @@
     events: InspectionEventDisplay[];
     onToggleExpand: (eventId: number) => void;
     onRemove: (eventId: number) => void;
+    onToggleWarningMark: (eventId: number) => void;
   }
 
   let streamElement: HTMLDivElement | null = $state(null);
-  let { events, onToggleExpand, onRemove }: Props = $props();
+  let { events, onToggleExpand, onRemove, onToggleWarningMark }: Props = $props();
 
   // Auto-scroll when events change
   $effect(() => {
@@ -29,7 +30,7 @@
     <div class="empty">No inspection events yet.</div>
   {:else}
     {#each events as e (e.id)}
-      <EventRow event={e} {onToggleExpand} {onRemove} />
+      <EventRow event={e} {onToggleExpand} {onRemove} {onToggleWarningMark} />
     {/each}
   {/if}
 </div>

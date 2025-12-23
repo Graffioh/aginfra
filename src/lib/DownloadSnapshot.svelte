@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { InspectionEventDisplay } from "../types";
+  import type { InspectionEventChild } from "../../protocol/types";
 
   interface Props {
     events: InspectionEventDisplay[];
@@ -7,17 +8,32 @@
 
   let { events }: Props = $props();
 
+  function formatChild(child: InspectionEventChild, indent: string = "  "): string {
+    return `${indent}${child.label}:\n${indent}  ${child.data.split("\n").join(`\n${indent}  `)}`;
+  }
+
+  function formatEvent(event: InspectionEventDisplay): string {
+    const timestamp = new Date(event.ts).toLocaleString();
+    const displayText = event.inspectionEvent.message || event.data;
+    const warningMarkPrefix = event.warningMarked ? "[⚠ WARNING, STRANGE BEHAVIOR] " : "";
+    
+    let result = `[${timestamp}] ${warningMarkPrefix}${displayText}`;
+    
+    if (event.inspectionEvent.children && event.inspectionEvent.children.length > 0) {
+      result += "\n";
+      result += event.inspectionEvent.children
+        .map((child) => formatChild(child))
+        .join("\n");
+    }
+    
+    return result;
+  }
+
   function buildInspectionSnapshot(): string {
     if (events.length === 0) {
       return "No inspection events yet.\n";
     }
-    return events
-      .map((e) => {
-        const timestamp = new Date(e.ts).toLocaleString();
-        const displayText = e.inspectionEvent.message || e.data;
-        return `[${timestamp}] ${displayText}`;
-      })
-      .join("\n");
+    return events.map(formatEvent).join("\n\n");
   }
 
   function downloadInspectionSnapshot() {

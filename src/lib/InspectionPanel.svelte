@@ -61,6 +61,7 @@
       ts: Date.now(),
       data: displayData,
       expanded: false,
+      warningMarked: false,
       inspectionEvent,
     };
 
@@ -82,6 +83,13 @@
     save("events", events);
   }
 
+  function toggleWarningMark(eventId: number) {
+    events = events.map((e) =>
+      e.id === eventId ? { ...e, warningMarked: !e.warningMarked } : e
+    );
+    save("events", events);
+  }
+
   function deleteAllEvents() {
     events = [];
     eventId = 0;
@@ -95,7 +103,11 @@
     const storedEventId = load<number>("eventId", 0);
     
     if (storedEvents.length > 0) {
-      events = storedEvents;
+      // Ensure backward compatibility: add warningMarked field if missing
+      events = storedEvents.map((e) => ({
+        ...e,
+        warningMarked: e.warningMarked ?? (e as any).marked ?? false,
+      }));
       eventId = storedEventId;
     }
 
@@ -169,6 +181,7 @@
     {events}
     onToggleExpand={toggleExpand}
     onRemove={removeEventRow}
+    onToggleWarningMark={toggleWarningMark}
   />
 
   <CurrentContext />
