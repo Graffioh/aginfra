@@ -103,11 +103,7 @@
     const storedEventId = load<number>("eventId", 0);
     
     if (storedEvents.length > 0) {
-      // Ensure backward compatibility: add warningMarked field if missing
-      events = storedEvents.map((e) => ({
-        ...e,
-        warningMarked: e.warningMarked ?? (e as any).marked ?? false,
-      }));
+      events = storedEvents;
       eventId = storedEventId;
     }
 

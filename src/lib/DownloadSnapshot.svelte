@@ -42,7 +42,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "inspection-snapshot.txt";
+    a.download = "maid-inspection-snap.txt";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
