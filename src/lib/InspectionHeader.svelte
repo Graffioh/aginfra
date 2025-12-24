@@ -1,5 +1,6 @@
 <script lang="ts">
   import DownloadSnapshot from "./DownloadSnapshot.svelte";
+  import ConfirmDialog from "./ConfirmDialog.svelte";
   import type { InspectionEventDisplay } from "../types";
 
   interface Props {
@@ -11,6 +12,21 @@
   }
 
   let { modelName = "", status = "connecting", agentConnected = false, events, onDeleteAll }: Props = $props();
+
+  let showConfirmDialog = $state(false);
+
+  function handleClearClick() {
+    showConfirmDialog = true;
+  }
+
+  function confirmDelete() {
+    onDeleteAll();
+    showConfirmDialog = false;
+  }
+
+  function cancelDelete() {
+    showConfirmDialog = false;
+  }
 </script>
 
 <div class="header">
@@ -21,7 +37,7 @@
   <div class="header-right-half">
     <button
       class="delete-events-button"
-      onclick={onDeleteAll}
+      onclick={handleClearClick}
       title="Delete all events"
       aria-label="Delete all events"
       disabled={events.length === 0}
@@ -37,6 +53,15 @@
     </div>
   </div>
 </div>
+
+<ConfirmDialog
+  show={showConfirmDialog}
+  message="Clear all events?"
+  confirmText="clear"
+  cancelText="cancel"
+  onConfirm={confirmDelete}
+  onCancel={cancelDelete}
+/>
 
 <style>
   .header {
