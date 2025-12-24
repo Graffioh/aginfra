@@ -57,7 +57,6 @@ export async function runLoop(userInput: string) {
 
     await updateContext({ role: "user", content: userInput });
 
-    // Mark the start of the agent loop (enables latency heatmap)
     await inspectionReporter.latencyStart("Agent is processing the user input...");
 
     while (true) {
@@ -88,7 +87,7 @@ export async function runLoop(userInput: string) {
 
         await inspectionReporter.trace(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
 
-        // Extract and send token usage
+        // Extract token usage
         if (data.usage) {
             const contextLimit = await fetchModelContextLimit(currentModel);
             const tokenUsage: TokenUsage = {
@@ -113,7 +112,6 @@ export async function runLoop(userInput: string) {
             const toolCount = toolCalls.length;
             const toolText = toolCount === 1 ? "tool" : "tools";
 
-            // Emit structured event (in this case, with reasoning if present)
             if (reasoning) {
                 await inspectionReporter.trace(
                     `Agent executing ${toolCount} ${toolText}: ${toolNames}`,
@@ -165,9 +163,9 @@ export async function runLoop(userInput: string) {
             continue;
         }
 
+        // No more tool calls, so we can display the final content
         const finalContent = msg.content ? msg.content : `The agent is confused (ᗒᗣᗕ)`;
 
-        // Emit structured event with reasoning if present
         if (reasoning) {
             await inspectionReporter.trace(
                 "Final Assistant message",
@@ -182,11 +180,10 @@ export async function runLoop(userInput: string) {
 
         await updateContext({
             role: "assistant",
-            content: msg.content
+            content: finalContent
         });
 
-        // Mark the end of the agent loop (enables latency heatmap)
-        await inspectionReporter.latencyEnd("Latency completed");
+        await inspectionReporter.latencyEnd("Agent loop completed.");
 
         return finalContent;
     }

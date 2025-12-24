@@ -17,6 +17,9 @@
   // Track selected bar index
   let selectedIndex = $state<number | null>(null);
 
+  // Track bar widths to determine if labels should be shown
+  let barWidths = $state<Record<number, number>>({});
+
   // Only compute latencies if loop markers are present
   const hasMarkers = $derived(hasLoopMarkers(events));
   const latencies = $derived(hasMarkers ? computeLatencies(events) : []);
@@ -69,6 +72,38 @@
     selectedIndex = index;
     onSelectEvent?.(index);
   }
+
+  // Check if label should be shown based on bar width
+  function shouldShowLabel(index: number, latency: number): boolean {
+    const width = barWidths[index];
+    if (!width) return false;
+    
+    // Only show label if bar is wider than this threshold (in pixels)
+    const minWidth = 30;
+    
+    return width >= minWidth;
+  }
+
+  // Update bar width when element is mounted or resized
+  function measureBar(element: HTMLElement, index: number) {
+    const updateWidth = () => {
+      const width = element.offsetWidth;
+      barWidths = { ...barWidths, [index]: width }; // Trigger reactivity with new object
+    };
+    
+    // Initial measurement with a slight delay to ensure element is rendered
+    setTimeout(updateWidth, 0);
+    
+    // Use ResizeObserver to track width changes
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(element);
+    
+    return {
+      destroy() {
+        resizeObserver.disconnect();
+      }
+    };
+  }
 </script>
 
 {#if events.length === 0}
@@ -109,8 +144,11 @@
               handleSelect(index);
             }
           }}
+          use:measureBar={index}
         >
-          <span class="heatmap-bar-label">{formatLatency(latency)}</span>
+          {#if shouldShowLabel(index, latency)}
+            <span class="heatmap-bar-label">{formatLatency(latency)}</span>
+          {/if}
         </div>
       {/each}
     </div>
