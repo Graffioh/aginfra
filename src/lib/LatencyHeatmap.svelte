@@ -17,6 +17,9 @@
   // Track selected bar index
   let selectedIndex = $state<number | null>(null);
 
+  // Reference to the bars container for auto-scroll
+  let barsContainer = $state<HTMLDivElement | null>(null);
+
   // Only compute latencies if loop markers are present
   const hasMarkers = $derived(hasLoopMarkers(events));
   const latencies = $derived(hasMarkers ? computeLatencies(events) : []);
@@ -28,6 +31,19 @@
   const intensities = $derived(
     latencies.map((latency) => getLatencyIntensity(latency, maxLatency))
   );
+
+  // Auto-scroll to the right when new latency blocks appear
+  $effect(() => {
+    const count = latencies.length;
+    if (count > 0 && barsContainer) {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (barsContainer) {
+          barsContainer.scrollLeft = barsContainer.scrollWidth;
+        }
+      });
+    }
+  });
 
   // Get border and background colors for intensity (green -> yellow -> red)
   function getColors(intensity: number): { border: string; hoverBg: string; selectedBg: string } {
@@ -85,7 +101,7 @@
         {latencies.length} steps • Max: {formatLatency(maxLatency)}
       </span>
     </div>
-    <div class="heatmap-bars">
+    <div class="heatmap-bars" bind:this={barsContainer}>
       {#each latencies as latency, index}
         {@const intensity = intensities[index]}
         {@const colors = getColors(intensity)}
