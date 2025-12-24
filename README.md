@@ -121,6 +121,12 @@ The UI displays different connection statuses:
 
 The agent is considered "connected" if it has sent any inspection event (trace, context, tokens, tools, model) within the last 10 seconds. This allows you to see at a glance whether your agent is running.
 
+## Integrating with a coding agent help
+
+You can integrate maid to your custom agent loop by using a custom coding agent of your choice and feeding in the `SETUP.md` prompt:
+
+https://github.com/user-attachments/assets/9d4e250a-2d31-44c0-9e8e-6a1c406af7a2
+
 ## Artifacts
 
 ### Architecture
