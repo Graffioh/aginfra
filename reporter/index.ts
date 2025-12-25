@@ -12,18 +12,27 @@
  * import { InspectionEventLabel } from "../protocol/types";
  *
  * const reporter = createHttpInspectionReporter("http://localhost:6969");
- * await reporter.trace("Agent is processing...");
+ * 
+ * // Simple log messages (unstructured)
+ * await reporter.log("Agent is processing...");
+ * await reporter.log("Debug: something happened");
+ * 
+ * // Structured traces with children
  * await reporter.trace("Model decision", [
  *   { label: InspectionEventLabel.Reasoning, data: "..." },
  *   { label: InspectionEventLabel.Content, data: "..." }
  * ]);
- * // Optional: include token usage for per-request tracking
- * await reporter.trace("API request completed", undefined, {
+ * 
+ * // Traces with token usage for per-request tracking
+ * await reporter.trace("API request completed", [
+ *   { label: InspectionEventLabel.Content, data: "..." }
+ * ], {
  *   promptTokens: 340,
  *   modelOutputTokens: 49,
  *   totalTokens: 389,
- *   modelReasoningTokens?: 30
+ *   modelReasoningTokens: 30
  * });
+ * 
  * await reporter.context(messages);
  * await reporter.tokens(currentUsage, maxTokens);
  * ```
@@ -33,7 +42,8 @@ import type { InspectionEvent, ContextMessage, AgentToolDefinition, TokenUsage }
 import { InspectionEventLabel } from "../protocol/types";
 
 type InspectionReporter = {
-    trace: (message: string, children?: Array<{ label: InspectionEventLabel; data: string }>, tokenUsage?: TokenUsage | null) => Promise<void>;
+    log: (message: string) => Promise<void>;
+    trace: (message: string, children: Array<{ label: InspectionEventLabel; data: string }>, tokenUsage?: TokenUsage | null) => Promise<void>;
     context: (ctx: ContextMessage[]) => Promise<void>;
     tokens: (currentUsage: number, maxTokens: number | null) => Promise<void>;
     tools: (toolDefinitions: AgentToolDefinition[]) => Promise<void>;
@@ -51,11 +61,29 @@ export function createHttpInspectionReporter(
     baseUrl: string = "http://localhost:6969",
 ): InspectionReporter {
     return {
-        async trace(message: string, children?: Array<{ label: InspectionEventLabel; data: string }>, tokenUsage?: TokenUsage | null): Promise<void> {
+        async log(message: string): Promise<void> {
+            console.log("Sending inspection log:", message);
+            try {
+                const event: InspectionEvent = { message };
+                const response = await fetch(`${baseUrl}/api/inspection/trace`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ event }),
+                });
+
+                if (!response.ok) {
+                    console.error(`Failed to send inspection log: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error("Error sending inspection log:", error);
+            }
+        },
+
+        async trace(message: string, children: Array<{ label: InspectionEventLabel; data: string }>, tokenUsage?: TokenUsage | null): Promise<void> {
             console.log("Sending inspection trace:", message);
             try {
                 // Build children array, adding token usage if provided
-                let finalChildren: Array<{ label: InspectionEventLabel; data: string }> | undefined = children;
+                let finalChildren = children;
                 
                 if (tokenUsage) {
                     // Format token usage as a readable string
@@ -68,15 +96,12 @@ export function createHttpInspectionReporter(
                     
                     const tokenUsageData = tokenParts.join(" • ");
                     
-                    // Add token usage child, merging with existing children if any
+                    // Add token usage child
                     const tokenUsageChild = { label: InspectionEventLabel.TokenUsage, data: tokenUsageData };
-                    finalChildren = children ? [...children, tokenUsageChild] : [tokenUsageChild];
+                    finalChildren = [...children, tokenUsageChild];
                 }
                 
-                // If children provided (including token usage), it's a trace event; otherwise it's a log event
-                const event: InspectionEvent = finalChildren
-                    ? { message, children: finalChildren }
-                    : { message };
+                const event: InspectionEvent = { message, children: finalChildren };
                 const response = await fetch(`${baseUrl}/api/inspection/trace`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

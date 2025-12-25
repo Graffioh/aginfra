@@ -85,7 +85,7 @@ export async function runLoop(userInput: string) {
 
         const data = await response.json();
 
-        await inspectionReporter.trace(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
+        await inspectionReporter.log(`Full OpenRouter API response: ${JSON.stringify(data, null, 2)}`);
 
         // Extract token usage for per-request reporting
         let requestTokenUsage: TokenUsage | null = null;
@@ -116,7 +116,7 @@ export async function runLoop(userInput: string) {
 
         const msg = data.choices[0].message;
 
-        await inspectionReporter.trace(`Model message: ${JSON.stringify(msg, null, 2)}`);
+        await inspectionReporter.log(`Model message: ${JSON.stringify(msg, null, 2)}`);
 
         const { tool_calls: toolCalls, reasoning } = msg;
 
@@ -150,7 +150,7 @@ export async function runLoop(userInput: string) {
                     ],
                 );
             } else {
-                await inspectionReporter.trace(`Agent executing ${toolCount} ${toolText}: ${toolNames}`);
+                await inspectionReporter.log(`Agent executing ${toolCount} ${toolText}: ${toolNames}`);
             }
 
             await updateContext({
@@ -206,7 +206,11 @@ export async function runLoop(userInput: string) {
                 requestTokenUsage
             );
         } else {
-            await inspectionReporter.trace(`Final Assistant message: ${finalContent}`, undefined, requestTokenUsage);
+            await inspectionReporter.trace(
+                "Final Assistant message",
+                [{ label: InspectionEventLabel.Content, data: finalContent }],
+                requestTokenUsage
+            );
         }
 
         await updateContext({
