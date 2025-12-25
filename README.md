@@ -5,7 +5,7 @@
        src="https://github.com/user-attachments/assets/2c52da38-c4e0-4221-aee5-93d7e4ed5f7d" />
 </p>
 
-my agent is dumb (maid) is a dev tool to inspect your agent behavior via agent specific log traces.
+my agent is dumb (maid) is a telemetry dev tool to inspect your agent behavior via agent traces.
 
 *(Under development)*
 
