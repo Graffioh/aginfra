@@ -9,7 +9,7 @@ RUN npm ci
 # Copy the rest of the repo (dev compose bind-mount will override source, but deps stay in the volume)
 COPY . .
 
-EXPOSE 5173
+EXPOSE 5555
 EXPOSE 6969
 
 

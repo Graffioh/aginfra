@@ -68,7 +68,7 @@ export async function runLoop(userInput: string) {
             headers: {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": "http://localhost:5173",
+                "HTTP-Referer": "http://localhost:5555",
                 "X-Title": "MyAgentIsDumb",
             },
             body: JSON.stringify({

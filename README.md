@@ -16,7 +16,7 @@ my agent is dumb (maid) is a dev tool to inspect your agent behavior via agent s
 - Start both services:
   - `docker compose up --build`
 - Open the UI:
-  - `http://localhost:5173`
+  - `http://localhost:5555`
 - Connect your own agent 
   - or if you want to understand how the dev tool works, spin up the one in `/dummy-agent`
 

@@ -10,7 +10,7 @@ const app = express();
 const HOST = "0.0.0.0";
 const PORT = 6969;
 
-const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const allowedOrigins = ["http://localhost:5555", "http://127.0.0.1:5555"];
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, cb) => {

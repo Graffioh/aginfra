@@ -19,9 +19,9 @@ services:
       context: .
       dockerfile: ./Dockerfile.dev
     working_dir: /app
-    command: sh -lc "npm run dev:frontend -- --host 0.0.0.0 --port 5173 --strictPort"
+    command: sh -lc "npm run dev:frontend -- --host 0.0.0.0 --port 5555 --strictPort"
     ports:
-      - "5173:5173"
+      - "5555:5555"
     environment:
       - VITE_INSPECTION_URL=http://localhost:6969/api
       - CHOKIDAR_USEPOLLING=true
