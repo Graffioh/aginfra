@@ -74,6 +74,18 @@ export function getTokenUsage(): TokenUsage {
     return { ...lastTokenUsage };
 }
 
-export function setLastTokenUsage(usage: TokenUsage) {
-    lastTokenUsage = usage;
+export function addTokenUsage(usage: TokenUsage) {
+    // Accumulate tokens across multiple API calls
+    lastTokenUsage = {
+        promptTokens: (lastTokenUsage.promptTokens ?? 0) + (usage.promptTokens ?? 0),
+        modelOutputTokens: (lastTokenUsage.modelOutputTokens ?? 0) + (usage.modelOutputTokens ?? 0),
+        totalTokens: lastTokenUsage.totalTokens + usage.totalTokens,
+        modelReasoningTokens: usage.modelReasoningTokens !== null 
+            ? (lastTokenUsage.modelReasoningTokens ?? 0) + (usage.modelReasoningTokens ?? 0)
+            : lastTokenUsage.modelReasoningTokens,
+        contextLimit: usage.contextLimit ?? lastTokenUsage.contextLimit,
+        remainingTokens: usage.contextLimit !== null 
+            ? usage.contextLimit - (lastTokenUsage.totalTokens + usage.totalTokens)
+            : null,
+    };
 }

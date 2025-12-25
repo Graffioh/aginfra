@@ -64,9 +64,6 @@ export type TokenUsage = {
 
 /**
  * Inspection event (with structured format for inspection messages)
- * Parent event uses message (string), children use label (InspectionEventLabel enum).
- * If children is present, it's a trace event with structured children.
- * If children is absent, it's a log event with just a message.
  */
 export enum InspectionEventLabel {
   Content = "Content",

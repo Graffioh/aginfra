@@ -9,7 +9,7 @@ import {
     clearContext as clearContextUtil,
     getContext as getContextUtil,
     getTokenUsage as getTokenUsageUtil,
-    setLastTokenUsage
+    addTokenUsage
 } from "./context";
 
 const inspectionReporter = createHttpInspectionReporter();
@@ -108,10 +108,13 @@ export async function runLoop(userInput: string) {
                 totalTokens,
                 modelReasoningTokens: data.usage.completion_tokens_details?.reasoning_tokens ?? null,
                 contextLimit: contextLimit ?? null,
-                remainingTokens: contextLimit !== null ? contextLimit - totalTokens : null,
+                remainingTokens: null, // Will be calculated in addTokenUsage
             };
-            setLastTokenUsage(tokenUsage);
-            await inspectionReporter.tokens(tokenUsage.totalTokens, tokenUsage.contextLimit ?? null);
+            addTokenUsage(tokenUsage);
+            
+            // Get the cumulative total after adding
+            const cumulativeUsage = getTokenUsageUtil();
+            await inspectionReporter.tokens(cumulativeUsage.totalTokens, cumulativeUsage.contextLimit ?? null);
         }
 
         const msg = data.choices[0].message;

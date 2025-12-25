@@ -8,24 +8,32 @@
 
   let { events }: Props = $props();
 
-  function formatChild(child: InspectionEventChild, indent: string = "  "): string {
+  function formatChild(
+    child: InspectionEventChild,
+    indent: string = "  "
+  ): string {
     return `${indent}${child.label}:\n${indent}  ${child.data.split("\n").join(`\n${indent}  `)}`;
   }
 
   function formatEvent(event: InspectionEventDisplay): string {
     const timestamp = new Date(event.ts).toLocaleString();
     const displayText = event.inspectionEvent.message || event.data;
-    const warningMarkPrefix = event.warningMarked ? "[⚠ WARNING, STRANGE BEHAVIOR] " : "";
-    
+    const warningMarkPrefix = event.warningMarked
+      ? "[⚠ WARNING, STRANGE BEHAVIOR] "
+      : "";
+
     let result = `[${timestamp}] ${warningMarkPrefix}${displayText}`;
-    
-    if (event.inspectionEvent.children && event.inspectionEvent.children.length > 0) {
+
+    if (
+      event.inspectionEvent.children &&
+      event.inspectionEvent.children.length > 0
+    ) {
       result += "\n";
       result += event.inspectionEvent.children
         .map((child) => formatChild(child))
         .join("\n");
     }
-    
+
     return result;
   }
 
