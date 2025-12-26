@@ -125,7 +125,7 @@
   }
 
   .usage-segment.remaining {
-    background: rgba(230, 237, 243, 0.15);
+    background: rgb(15, 15, 15);
   }
 
   .usage-legend {

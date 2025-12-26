@@ -86,6 +86,23 @@
       isSending = false;
     }
   }
+
+  async function deleteContext() {
+    try {
+      const response = await fetch(AGENT_URL + "/agent/context", {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        messages = [];
+        updateChatText();
+      } else {
+        console.error("Failed to delete context");
+      }
+    } catch (error) {
+      console.error("Error deleting context:", error);
+    }
+  }
 </script>
 
 <div id="chat">
@@ -93,6 +110,16 @@
   {#if isSending}
     <div class="status">Thinking...</div>
   {/if}
+  <div class="chat-footer">
+    <button
+      class="delete-context-button"
+      onclick={deleteContext}
+      title="Clear context"
+      aria-label="Clear context"
+    >
+      delete context
+    </button>
+  </div>
   <TextInput onsend={handleSend} disabled={isSending} />
 </div>
 
@@ -104,6 +131,37 @@
     gap: 8px;
     padding: 16px;
     box-sizing: border-box;
+  }
+
+  .chat-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+  }
+
+  .delete-context-button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: #c9d1d9;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .delete-context-button:hover {
+    border-color: rgba(248, 81, 73, 0.7);
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.1);
+  }
+
+  .delete-context-button:active {
+    background: rgba(248, 81, 73, 0.2);
   }
 
   .status {

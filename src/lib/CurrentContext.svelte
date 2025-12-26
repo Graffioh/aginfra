@@ -95,24 +95,6 @@
   const INSPECTION_URL =
     import.meta.env.VITE_INSPECTION_URL || "http://localhost:6969/api";
 
-  async function deleteContext(e: MouseEvent) {
-    e.stopPropagation();
-
-    try {
-      const response = await fetch(AGENT_URL + "/agent/context", {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        context = [];
-      } else {
-        console.error("Failed to delete context");
-      }
-    } catch (error) {
-      console.error("Error deleting context:", error);
-    }
-  }
-
   async function refreshContext(e: MouseEvent) {
     e.stopPropagation();
 
@@ -254,14 +236,6 @@
         aria-label="Refresh context"
       >
         ↺
-      </button>
-      <button
-        class="delete-context-button"
-        onclick={deleteContext}
-        title="Clear context"
-        aria-label="Clear context"
-      >
-        delete context
       </button>
     </div>
   </div>
@@ -420,31 +394,6 @@
 
   .refresh-context-button:active {
     background: rgba(88, 166, 255, 0.2);
-  }
-
-  .delete-context-button {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    color: #c9d1d9;
-    cursor: pointer;
-    font-size: 12px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .delete-context-button:hover {
-    border-color: rgba(248, 81, 73, 0.7);
-    color: #ff7b72;
-    background: rgba(248, 81, 73, 0.1);
-  }
-
-  .delete-context-button:active {
-    background: rgba(248, 81, 73, 0.2);
   }
 
   .context-content {
