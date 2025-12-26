@@ -88,6 +88,20 @@
     selectedIndex = index;
     onSelectEvent?.(index);
   }
+
+  function handleSelectMax() {
+    // Find the index of the max latency
+    const maxIndex = latencies.indexOf(maxLatency);
+    if (maxIndex !== -1) {
+      handleSelect(maxIndex);
+      // Scroll to the max latency bar
+      if (barsContainer) {
+        const barWidth = 45 + 2; // bar width + gap
+        const targetScroll = maxIndex * barWidth - barsContainer.clientWidth / 2 + barWidth / 2;
+        barsContainer.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      }
+    }
+  }
 </script>
 
 {#if events.length === 0}
@@ -101,7 +115,13 @@
     <div class="heatmap-header">
       <span class="heatmap-title">Latency Heatmap</span>
       <span class="heatmap-stats">
-        {latencies.length} steps • Max: {formatLatency(maxLatency)}
+        {latencies.length} steps • <button
+          class="max-button"
+          onclick={handleSelectMax}
+          title="Click to jump to max latency block"
+        >
+          Max: {formatLatency(maxLatency)}
+        </button>
       </span>
     </div>
     <div class="heatmap-bars" bind:this={barsContainer}>
@@ -191,6 +211,23 @@
     font-size: 11px;
     color: rgba(230, 237, 243, 0.6);
     font-family: monospace;
+  }
+
+  .max-button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 11px;
+    font-family: monospace;
+    color: #ff4444;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+  }
+
+  .max-button:hover {
+    color: #ff6666;
+    text-decoration: underline;
   }
 
   .heatmap-bars {
