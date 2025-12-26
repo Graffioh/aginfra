@@ -136,17 +136,6 @@ All protocol types are available in `protocol/types.ts`.
 
 You can check the agent implementation in `/dummy-agent` and `/reporter` as a reference. 
 
-### Connection status indicators
-
-The UI displays different connection statuses:
-
-- **Connecting...** - The frontend is establishing connection to the inspection server
-- **Live** - The frontend is connected to the inspection server AND an agent is actively sending events (activity detected within the last 10 seconds)
-- **Idle** - The frontend is connected to the inspection server but no agent is currently sending events
-- **Error** - The frontend failed to connect to the inspection server
-
-The agent is considered "connected" if it has sent any inspection event (trace, context, tokens, tools, model) within the last 10 seconds. This allows you to see at a glance whether your agent is running.
-
 ## Integrating with the help of a coding agent
 
 You can integrate maid to your custom agent loop by using a custom coding agent of your choice and feeding in the `SETUP.md` prompt:
