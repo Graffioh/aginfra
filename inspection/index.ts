@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { Request, Response } from "express";
+import { randomUUID } from "crypto";
+import { InspectionEventLabel, type InspectionEvent } from "../protocol/types";
 
 const app = express();
 
@@ -49,6 +51,9 @@ let lastAgentActivity: number | null = null;
 const AGENT_TIMEOUT_MS = 10000; // Consider agent disconnected after 10 seconds of inactivity
 let lastBroadcastedStatus: boolean | null = null;
 
+// Track current invocation ID (auto-generated on InvocationStart)
+let currentInvocationId: string | null = null;
+
 // Helper function to initialize SSE response
 function initSSE(res: Response) {
   res.setHeader("Content-Type", "text/event-stream");
@@ -75,7 +80,7 @@ app.get("/api/inspection/trace", (req: Request, res: Response) => {
 // HTTP endpoint for agent to send inspection trace events
 app.post("/api/inspection/trace", (req: Request, res: Response) => {
   try {
-    const { event } = req.body;
+    const { event } = req.body as { event: InspectionEvent };
     
     if (!event) {
       return res.status(400).json({ error: "Event is required" });
@@ -91,7 +96,21 @@ app.post("/api/inspection/trace", (req: Request, res: Response) => {
       broadcastAgentStatus();
     }
 
-    const payload = JSON.stringify(event);
+    // Check if this event contains InvocationStart - if so, start a new invocation
+    const hasInvocationStart = event.children?.some(
+      (child) => child.label === InspectionEventLabel.InvocationStart
+    );
+    if (hasInvocationStart) {
+      currentInvocationId = randomUUID();
+    }
+
+    // Attach invocationId to the event
+    const enrichedEvent: InspectionEvent = {
+      ...event,
+      invocationId: currentInvocationId ?? undefined,
+    };
+
+    const payload = JSON.stringify(enrichedEvent);
 
     inspectionClients.forEach((client) => {
       try {

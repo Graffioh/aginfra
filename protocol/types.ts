@@ -72,8 +72,8 @@ export enum InspectionEventLabel {
   Timing = "Timing",
   TokenUsage = "Token Usage",
   Custom = "Custom",
-  LatencyStart = "__LATENCY_START__",
-  LatencyEnd = "__LATENCY_END__",
+  InvocationStart = "__INVOCATION_START__",
+  InvocationEnd = "__INVOCATION_END__",
 }
 
 export type InspectionEventChild = {
@@ -84,4 +84,5 @@ export type InspectionEventChild = {
 export type InspectionEvent = {
   message: string;
   children?: InspectionEventChild[];
+  invocationId?: string;
 };

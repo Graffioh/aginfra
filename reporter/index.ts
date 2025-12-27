@@ -1,7 +1,7 @@
 /**
  * Inspection Reporter
  *  + HTTP client for sending events to the inspection server to be imported inside the agent loop.
- *  + Latency loop markers for tracking agent loop iterations and calculating latency heatmap.
+ *  + Invocation markers for grouping agent invocations and calculating latency heatmap.
  *
  * This module provides a ready-to-use client for any agent implementation
  * to send debugging events to the inspection server.
@@ -12,6 +12,11 @@
  * import { InspectionEventLabel } from "../protocol/types";
  *
  * const reporter = createHttpInspectionReporter("http://localhost:6969");
+ * 
+ * // Mark invocation boundaries (groups events + enables latency heatmap)
+ * await reporter.invocationStart("Agent is processing...");
+ * // ... agent work ...
+ * await reporter.invocationEnd("Invocation completed");
  * 
  * // Simple log messages (unstructured)
  * await reporter.log("Agent is processing...");
@@ -48,8 +53,8 @@ type InspectionReporter = {
     tokens: (currentUsage: number, maxTokens: number | null) => Promise<void>;
     tools: (toolDefinitions: AgentToolDefinition[]) => Promise<void>;
     model: (modelName: string) => Promise<void>;
-    latencyStart: (message?: string) => Promise<void>;
-    latencyEnd: (message?: string) => Promise<void>;
+    invocationStart: (message?: string) => Promise<void>;
+    invocationEnd: (message?: string) => Promise<void>;
 };
 
 /**
@@ -181,11 +186,11 @@ export function createHttpInspectionReporter(
             }
         },
 
-        async latencyStart(message: string = "Latency started"): Promise<void> {
+        async invocationStart(message: string = "Invocation started"): Promise<void> {
             try {
                 const event: InspectionEvent = {
                     message,
-                    children: [{ label: InspectionEventLabel.LatencyStart, data: "" }]
+                    children: [{ label: InspectionEventLabel.InvocationStart, data: "" }]
                 };
                 const response = await fetch(`${baseUrl}/api/inspection/trace`, {
                     method: "POST",
@@ -194,18 +199,18 @@ export function createHttpInspectionReporter(
                 });
 
                 if (!response.ok) {
-                    console.error(`Failed to send latency start: ${response.statusText}`);
+                    console.error(`Failed to send invocation start: ${response.statusText}`);
                 }
             } catch (error) {
-                console.error("Error sending latency start:", error);
+                console.error("Error sending invocation start:", error);
             }
         },
 
-        async latencyEnd(message: string = "Latency ended"): Promise<void> {
+        async invocationEnd(message: string = "Invocation ended"): Promise<void> {
             try {
                 const event: InspectionEvent = {
                     message,
-                    children: [{ label: InspectionEventLabel.LatencyEnd, data: "" }]
+                    children: [{ label: InspectionEventLabel.InvocationEnd, data: "" }]
                 };
                 const response = await fetch(`${baseUrl}/api/inspection/trace`, {
                     method: "POST",
@@ -214,10 +219,10 @@ export function createHttpInspectionReporter(
                 });
 
                 if (!response.ok) {
-                    console.error(`Failed to send latency end: ${response.statusText}`);
+                    console.error(`Failed to send invocation end: ${response.statusText}`);
                 }
             } catch (error) {
-                console.error("Error sending latency end:", error);
+                console.error("Error sending invocation end:", error);
             }
         },
     };

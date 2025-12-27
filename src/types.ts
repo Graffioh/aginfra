@@ -10,6 +10,7 @@ export type InspectionEventDisplay = {
   expanded: boolean;
   warningMarked: boolean;
   inspectionEvent: InspectionEvent;
+  invocationId?: string;
 };
 
 // TokenUsage is now imported from protocol/types.ts

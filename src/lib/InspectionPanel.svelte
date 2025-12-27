@@ -33,17 +33,20 @@
 
       // if children exists, it's a structured trace; otherwise it's a log
       if (parsed && typeof parsed === "object") {
+        const invocationId = typeof parsed.invocationId === "string" ? parsed.invocationId : undefined;
         if (Array.isArray(parsed.children)) {
           // Trace event: has children
           inspectionEvent = {
             message: parsed.message || "No message",
             children: parsed.children as InspectionEvent["children"],
+            invocationId,
           };
           displayData = parsed.message || "No message";
         } else if (typeof parsed.message === "string") {
           // Log event: has message
           inspectionEvent = {
             message: parsed.message,
+            invocationId,
           };
           displayData = parsed.message;
         } else {
@@ -68,6 +71,7 @@
       expanded: false,
       warningMarked: false,
       inspectionEvent,
+      invocationId: inspectionEvent.invocationId,
     };
 
     const next = [...events, eventData];
@@ -127,8 +131,14 @@
     const storedEventId = load<number>("eventId", 0);
 
     if (storedEvents.length > 0) {
-      events = storedEvents;
-      eventId = storedEventId;
+      const cappedEvents =
+        storedEvents.length > 300
+          ? storedEvents.slice(storedEvents.length - 300)
+          : storedEvents;
+      events = cappedEvents;
+
+      const maxId = cappedEvents.reduce((m, e) => Math.max(m, e.id), 0);
+      eventId = Math.max(storedEventId, maxId + 1);
     }
 
     eventSource = new EventSource(INSPECTION_URL + "/inspection/trace");

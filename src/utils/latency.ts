@@ -9,22 +9,22 @@ function hasLabel(event: InspectionEventDisplay, label: InspectionEventLabel): b
 }
 
 /**
- * Checks if any events have latency markers (LatencyStart or LatencyEnd).
- * The heatmap should only be displayed if latency markers are present.
+ * Checks if any events have invocation markers (InvocationStart or InvocationEnd).
+ * The heatmap should only be displayed if invocation markers are present.
  */
 export function hasLoopMarkers(events: InspectionEventDisplay[]): boolean {
   return events.some(event => 
-    hasLabel(event, InspectionEventLabel.LatencyStart) || 
-    hasLabel(event, InspectionEventLabel.LatencyEnd)
+    hasLabel(event, InspectionEventLabel.InvocationStart) || 
+    hasLabel(event, InspectionEventLabel.InvocationEnd)
   );
 }
 
 /**
- * Computes latency (time difference) between consecutive events within each loop.
- * A new loop starts when an event has the LatencyStart label.
- * First event of each loop has latency 0.
+ * Computes latency (time difference) between consecutive events within each invocation.
+ * A new invocation starts when an event has the InvocationStart label.
+ * First event of each invocation has latency 0.
  * 
- * Requires latency markers to be set via reporter.latencyStart() and reporter.latencyEnd().
+ * Requires invocation markers to be set via reporter.invocationStart() and reporter.invocationEnd().
  */
 export function computeLatencies(events: InspectionEventDisplay[]): number[] {
   if (events.length === 0) return [];
@@ -34,10 +34,10 @@ export function computeLatencies(events: InspectionEventDisplay[]): number[] {
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
     const prevEvent = i > 0 ? events[i - 1] : null;
-    const isLoopStart = hasLabel(event, InspectionEventLabel.LatencyStart);
+    const isInvocationStart = hasLabel(event, InspectionEventLabel.InvocationStart);
 
-    if (isLoopStart || !prevEvent) {
-      // First event of a new loop (or very first event) has latency 0
+    if (isInvocationStart || !prevEvent) {
+      // First event of a new invocation (or very first event) has latency 0
       latencies.push(0);
     } else {
       // Calculate latency from previous event

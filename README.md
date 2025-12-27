@@ -111,18 +111,20 @@ Measure and report the execution time of tool calls to identify performance bott
   );
 ```
 
-#### Latency heatmap
+#### Group invocations & Latency heatmap
+
+You can group invocations to have more readable traces and visualize the time between consecutive events within each agent loop iteration.
 
 The latency heatmap visualizes the time between consecutive events within each agent loop iteration. To enable it, mark the start and end of your agent loop:
 
 ```ts
 // At the start of processing a user message/request
-await reporter.latencyStart("Agent is processing the user input...");
+await reporter.invocationStart("Agent is processing the user input...");
 
 // ... your agent logic, traces, tool calls ...
 
 // At the end of the loop (when response is complete)
-await reporter.latencyEnd("Loop completed");
+await reporter.invocationEnd("Invocation completed");
 ```
 
 #### Others

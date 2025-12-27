@@ -71,7 +71,7 @@ export async function runLoop(userInput: string) {
 
     await updateContext({ role: "user", content: userInput });
 
-    await inspectionReporter.latencyStart("Agent is processing the user input...");
+    await inspectionReporter.invocationStart("Agent is processing the user input...");
 
     let iteration = 0;
     while (true) {
@@ -83,7 +83,7 @@ export async function runLoop(userInput: string) {
             );
             const fallback = "I'm unable to complete this request due to too many tool calls.";
             await updateContext({ role: "assistant", content: fallback });
-            await inspectionReporter.latencyEnd("Agent loop aborted (max iterations).");
+            await inspectionReporter.invocationEnd("Agent loop aborted (max iterations).");
             return fallback;
         }
 
@@ -274,7 +274,7 @@ export async function runLoop(userInput: string) {
             content: finalContent
         });
 
-        await inspectionReporter.latencyEnd("Agent loop completed.");
+        await inspectionReporter.invocationEnd("Agent loop completed.");
 
         return finalContent;
     }
