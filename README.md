@@ -32,7 +32,7 @@ my agent is dumb (maid) is a telemetry dev tool to inspect your agent behavior v
 - Start the **inspection backend**: npm run dev:inspection
 - (Optional) Start the **agent**: npm run dev:agent
 
-## Running your own agent
+## Tracking your own agent
 
 Before starting your own agent loop, a client that calls inspection backend needs to be instantiated.
 
