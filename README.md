@@ -9,6 +9,12 @@ my agent is dumb (maid) is a telemetry dev tool to inspect your agent behavior v
 
 *(Under development)*
 
+## Why this and not LangSmith?
+
+1) Open source
+2) It's customizable based on your needs
+3) It has a really cool mascot
+
 ## Usage
 
 ### With Docker (frontend + inspection backend)
