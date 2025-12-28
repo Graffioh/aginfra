@@ -133,6 +133,34 @@ await reporter.invocationStart("Agent is processing the user input...");
 await reporter.invocationEnd("Invocation completed");
 ```
 
+#### Error reporting & Error rate
+
+Report errors that occur during agent execution to track error rates per invocation. 
+
+Wrap error-prone operations in try/catch blocks and report errors:
+
+```ts
+try {
+  // ... your agent logic ...
+} catch (error) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  await reporter.error("Agent loop failed", errorMessage);
+  await reporter.invocationEnd("Agent loop failed with error.");
+  throw error; // re-throw if needed
+}
+```
+
+You can also report specific error conditions:
+
+```ts
+// Report empty content as an error
+if (hasEmptyContent) {
+  await reporter.error("Empty content returned", "Model returned empty or null content");
+}
+```
+
+The error rate is calculated client-side from persisted events, so it survives server restarts and accurately reflects the actual error rate based on what's visible in the UI.
+
 #### Others
 
 - `tokens` ➜ (currentTokensUsage: number, modelContextLimit: number) 
