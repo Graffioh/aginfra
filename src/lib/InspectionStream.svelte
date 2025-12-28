@@ -14,10 +14,11 @@
     highlightedEventId,
     onToggleExpand,
     onRemove,
+    onRemoveGroup,
     onToggleWarningMark,
   } = $props();
 
-  const parentEventHandlers = $derived({ onToggleExpand, onRemove, onToggleWarningMark });
+  const parentEventHandlers = $derived({ onToggleExpand, onRemove, onRemoveGroup, onToggleWarningMark });
 
   let previousEventCount = 0;
 

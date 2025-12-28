@@ -40,6 +40,14 @@
  * 
  * await reporter.context(messages);
  * await reporter.tokens(currentUsage, maxTokens);
+ * 
+ * // Report errors (tracks error rate per invocation)
+ * try {
+ *   // ... agent work ...
+ * } catch (error) {
+ *   await reporter.error("Operation failed", error.message);
+ *   throw error;
+ * }
  * ```
  */
 

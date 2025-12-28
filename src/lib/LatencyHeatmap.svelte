@@ -114,7 +114,7 @@
 {:else}
   <section class="heatmap-container" aria-label="Latency heatmap">
     <div class="heatmap-header">
-      <span class="heatmap-title">Latency Heatmap</span>
+      <span class="heatmap-title">Latency</span>
       <span class="heatmap-stats">
         {latencies.length} steps • <button
           class="max-button"

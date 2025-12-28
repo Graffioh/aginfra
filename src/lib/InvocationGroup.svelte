@@ -18,6 +18,7 @@
     onToggle,
     onToggleExpand,
     onRemove,
+    onRemoveGroup,
     onToggleWarningMark,
   }: {
     group: InvocationGroupData;
@@ -27,6 +28,7 @@
     onToggle: () => void;
     onToggleExpand: (eventId: number) => void;
     onRemove: (eventId: number) => void;
+    onRemoveGroup: (invocationId: string) => void;
     onToggleWarningMark: (eventId: number) => void;
   } = $props();
 
@@ -51,28 +53,37 @@
 </script>
 
 <div class="invocation-group" class:highlighted={hasHighlighted && !isExpanded}>
-  <button
-    class="group-header"
-    type="button"
-    onclick={onToggle}
-  >
-    <span class="group-arrow" class:expanded={isExpanded}>▶</span>
-    <span class="group-id" title={group.invocationId}>
-      {group.invocationId.slice(0, 8)}
-    </span>
-    {#if groupHasToolCalls(group)}
-      <span class="tool-badge" title="Contains tool calls">T</span>
-    {/if}
-    {#if groupHasError(group)}
-      <span class="error-badge" title="Error occurred">Error</span>
-    {/if}
-    <span class="group-meta">
-      {group.events.length} events • {formatDuration(group.firstTs, group.lastTs)}
-    </span>
+  <div class="group-header">
     <span class="group-time">
       {new Date(group.firstTs).toLocaleTimeString()}
     </span>
-  </button>
+    <button
+      class="group-toggle"
+      type="button"
+      onclick={onToggle}
+    >
+      <span class="group-arrow" class:expanded={isExpanded}>▶</span>
+      <span class="group-id" title={group.invocationId}>
+        {group.invocationId.slice(0, 8)}
+      </span>
+      {#if groupHasToolCalls(group)}
+        <span class="tool-badge" title="Contains tool calls">T</span>
+      {/if}
+      {#if groupHasError(group)}
+        <span class="error-badge" title="Error occurred">Error</span>
+      {/if}
+      <span class="group-meta">
+        {group.events.length} events • {formatDuration(group.firstTs, group.lastTs)}
+      </span>
+    </button>
+    <button
+      class="remove-button"
+      onclick={() => onRemoveGroup(group.invocationId)}
+      title="Remove invocation group"
+    >
+      ×
+    </button>
+  </div>
   {#if isExpanded}
     <div class="group-events">
       {#each group.events as e (e.id)}
@@ -106,19 +117,35 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 100%;
     padding: 8px 12px;
     background: rgba(88, 166, 255, 0.08);
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font: inherit;
-    color: #e6edf3;
     transition: background 0.2s;
   }
 
   .group-header:hover {
     background: rgba(88, 166, 255, 0.15);
+  }
+
+  .group-time {
+    font-size: 12px;
+    color: rgba(230, 237, 243, 0.65);
+    font-family: monospace;
+    flex-shrink: 0;
+    width: 80px;
+  }
+
+  .group-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: #e6edf3;
   }
 
   .group-arrow {
@@ -171,15 +198,37 @@
     flex: 1;
   }
 
-  .group-time {
-    font-size: 11px;
-    color: rgba(230, 237, 243, 0.5);
-    font-family: monospace;
-  }
-
   .group-events {
     border-top: 1px solid rgba(88, 166, 255, 0.15);
     padding: 4px 8px;
     background: rgba(0, 0, 0, 0.15);
+  }
+
+  .remove-button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: rgba(230, 237, 243, 0.65);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .remove-button:hover {
+    border-color: rgba(248, 81, 73, 0.7);
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.1);
+  }
+
+  .remove-button:active {
+    background: rgba(248, 81, 73, 0.2);
   }
 </style>

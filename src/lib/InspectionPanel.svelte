@@ -122,6 +122,17 @@
     save("events", events);
   }
 
+  function removeInvocationGroup(invocationId: string) {
+    const removedEventIds = events
+      .filter((e) => e.invocationId === invocationId)
+      .map((e) => e.id);
+    events = events.filter((e) => e.invocationId !== invocationId);
+    if (highlightedEventId !== null && removedEventIds.includes(highlightedEventId)) {
+      highlightedEventId = null;
+    }
+    save("events", events);
+  }
+
   function toggleWarningMark(eventId: number) {
     events = events.map((e) =>
       e.id === eventId ? { ...e, warningMarked: !e.warningMarked } : e
@@ -273,6 +284,7 @@
     {highlightedEventId}
     onToggleExpand={toggleExpand}
     onRemove={removeEventRow}
+    onRemoveGroup={removeInvocationGroup}
     onToggleWarningMark={toggleWarningMark}
   />
 
