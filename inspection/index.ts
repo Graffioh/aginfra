@@ -384,6 +384,42 @@ app.get("/api/inspection/agent-status", (req: Request, res: Response) => {
   });
 });
 
+// HTTP endpoint for agent to report errors (creates trace event with Error label)
+app.post("/api/inspection/errors", (req: Request, res: Response) => {
+  try {
+    const { message, details } = req.body;
+
+    if (typeof message !== "string") {
+      return res.status(400).json({ error: "message must be a string" });
+    }
+
+    // Update agent activity timestamp
+    lastAgentActivity = Date.now();
+
+    // Send as a trace event so it shows in the inspection stream
+    const event: InspectionEvent = {
+      message: `Error: ${message}`,
+      children: details ? [{ label: InspectionEventLabel.Error, data: details }] : [],
+      invocationId: currentInvocationId ?? undefined,
+    };
+
+    const payload = JSON.stringify(event);
+    inspectionClients.forEach((client) => {
+      try {
+        client.write(`data: ${payload}\n\n`);
+      } catch {
+        try { client.end(); } catch {}
+        inspectionClients = inspectionClients.filter((c) => c !== client);
+      }
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("[ERROR] Failed to record error:", error);
+    res.status(500).json({ error: "Failed to record error" });
+  }
+});
+
 // Periodically check agent connection status and broadcast updates only on change
 setInterval(() => {
   const currentStatus = isAgentConnected();

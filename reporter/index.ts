@@ -55,6 +55,7 @@ type InspectionReporter = {
     model: (modelName: string) => Promise<void>;
     invocationStart: (message?: string) => Promise<void>;
     invocationEnd: (message?: string) => Promise<void>;
+    error: (message: string, details?: string) => Promise<void>;
 };
 
 /**
@@ -223,6 +224,23 @@ export function createHttpInspectionReporter(
                 }
             } catch (error) {
                 console.error("Error sending invocation end:", error);
+            }
+        },
+
+        async error(message: string, details?: string): Promise<void> {
+            console.log("Sending inspection error:", message);
+            try {
+                const response = await fetch(`${baseUrl}/api/inspection/errors`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message, details }),
+                });
+
+                if (!response.ok) {
+                    console.error(`Failed to send error: ${response.statusText}`);
+                }
+            } catch (err) {
+                console.error("Error sending inspection error:", err);
             }
         },
     };

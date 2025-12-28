@@ -8,6 +8,7 @@
     status: "connecting" | "connected" | "error";
     agentConnected: boolean;
     events: InspectionEventDisplay[];
+    errorRate: number;
     onDeleteAll: () => void;
   }
 
@@ -16,6 +17,7 @@
     status = "connecting",
     agentConnected = false,
     events = [],
+    errorRate = 0,
     onDeleteAll,
   }: Props = $props();
 
@@ -72,6 +74,13 @@
       clear
     </button>
     <DownloadSnapshot {events} />
+    <div 
+      class="error-rate-pill" 
+      class:has-errors={errorRate > 0}
+      title="Error rate (errors / invocations)"
+    >
+      {errorRate.toFixed(1)}% err
+    </div>
     <div class="pill {statusClass}" role="status" aria-live="polite">
       {statusText}
     </div>
@@ -142,6 +151,22 @@
   .pill.error {
     border-color: rgba(248, 81, 73, 0.7);
     color: #ff7b72;
+  }
+
+  .error-rate-pill {
+    font-size: 11px;
+    font-family: monospace;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(230, 237, 243, 0.6);
+    transition: all 0.2s;
+  }
+
+  .error-rate-pill.has-errors {
+    border-color: rgba(248, 81, 73, 0.5);
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.1);
   }
 
   .delete-events-button {

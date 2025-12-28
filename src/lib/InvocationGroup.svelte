@@ -42,6 +42,12 @@
       e.inspectionEvent.children?.some(child => child.label === InspectionEventLabel.ToolCalls)
     );
   }
+
+  function groupHasError(group: InvocationGroupData): boolean {
+    return group.events.some(e =>
+      e.inspectionEvent.children?.some(child => child.label === InspectionEventLabel.Error)
+    );
+  }
 </script>
 
 <div class="invocation-group" class:highlighted={hasHighlighted && !isExpanded}>
@@ -56,6 +62,9 @@
     </span>
     {#if groupHasToolCalls(group)}
       <span class="tool-badge" title="Contains tool calls">T</span>
+    {/if}
+    {#if groupHasError(group)}
+      <span class="error-badge" title="Error occurred">Error</span>
     {/if}
     <span class="group-meta">
       {group.events.length} events • {formatDuration(group.firstTs, group.lastTs)}
@@ -142,6 +151,18 @@
     background: rgba(163, 113, 247, 0.15);
     color: #a371f7;
     border: 1px solid rgba(163, 113, 247, 0.3);
+  }
+
+  .error-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    cursor: help;
+    background: rgba(248, 81, 73, 0.15);
+    color: #ff7b72;
+    border: 1px solid rgba(248, 81, 73, 0.4);
   }
 
   .group-meta {

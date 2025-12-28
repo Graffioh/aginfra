@@ -74,6 +74,7 @@ export enum InspectionEventLabel {
   Custom = "Custom",
   InvocationStart = "__INVOCATION_START__",
   InvocationEnd = "__INVOCATION_END__",
+  Error = "Error",
 }
 
 export type InspectionEventChild = {

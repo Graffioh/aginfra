@@ -5,7 +5,7 @@
   import InspectionStream from "./InspectionStream.svelte";
   import LatencyHeatmap from "./LatencyHeatmap.svelte";
   import type { InspectionEventDisplay } from "../types";
-  import type { InspectionEvent } from "../../protocol/types";
+  import { InspectionEventLabel, type InspectionEvent } from "../../protocol/types";
   import { load, save } from "../utils/persistence";
 
   let events: InspectionEventDisplay[] = $state([]);
@@ -20,6 +20,33 @@
   let modelEventSource: EventSource | null = null;
   let agentStatusEventSource: EventSource | null = null;
   let highlightTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Calculate error rate from events (derived from persisted events)
+  const errorRate = $derived.by(() => {
+    // Get unique invocation IDs (each represents one invocation)
+    const invocationIds = new Set<string>();
+    const errorInvocationIds = new Set<string>();
+
+    for (const e of events) {
+      if (e.invocationId) {
+        invocationIds.add(e.invocationId);
+        
+        // Check if this event has an error
+        const hasError = e.inspectionEvent.children?.some(
+          child => child.label === InspectionEventLabel.Error
+        );
+        if (hasError) {
+          errorInvocationIds.add(e.invocationId);
+        }
+      }
+    }
+
+    const invocationCount = invocationIds.size;
+    const errorCount = errorInvocationIds.size;
+    
+    if (invocationCount === 0) return 0;
+    return Math.round((errorCount / invocationCount) * 100 * 100) / 100;
+  });
 
   const INSPECTION_URL =
     import.meta.env.VITE_INSPECTION_URL || "http://localhost:6969/api";
@@ -231,6 +258,7 @@
     {status}
     {agentConnected}
     {events}
+    {errorRate}
     onDeleteAll={deleteAllEvents}
   />
 

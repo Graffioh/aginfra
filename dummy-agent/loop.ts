@@ -41,7 +41,7 @@ const SYSTEM_PROMPT = `
 You are a helpful assistant that can answer questions and help with tasks.
 Your response should be concise and to the point.
 
-Format the bold, italic, underline, code, blockquote, list, image, and other special text with HTML.
+When generating the final response to be displayed: format the bold, italic, underline, code, blockquote, list, image, and other special text with HTML.
 
 You have access to tools to help you with your tasks (if needed).
 
@@ -55,8 +55,8 @@ Follow these rules strictly:
 
 When the user request:
 - system informations, fetch using runNeofetch tool
-- a film/anime/tv show, fetch using the getMovie tool
-- a meme, fetch a meme from r/dankmemes.
+- a film/anime/tv show, fetch using the getMovie tool and display the image
+- a meme, fetch a meme using getMeme tool from r/dankmemes subreddit, and display the link to the meme
 `.trim();
 
 export async function runLoop(userInput: string) {
@@ -73,6 +73,7 @@ export async function runLoop(userInput: string) {
 
     await inspectionReporter.invocationStart("Agent is processing the user input...");
 
+    try {
     let iteration = 0;
     while (true) {
         iteration++;
@@ -244,12 +245,20 @@ export async function runLoop(userInput: string) {
 
         // No more tool calls, so we can display the final content
         let finalContent: string;
-        if (typeof msg.content === "string") {
+        let hasEmptyContent = false;
+        
+        if (typeof msg.content === "string" && msg.content.trim().length > 0) {
             finalContent = msg.content;
-        } else if (msg.content == null) {
+        } else if (msg.content == null || (typeof msg.content === "string" && msg.content.trim().length === 0)) {
             finalContent = "The agent is confused (ᗒᗣᗕ)";
+            hasEmptyContent = true;
         } else {
             finalContent = String(msg.content);
+        }
+
+        // Report empty content as an error
+        if (hasEmptyContent) {
+            await inspectionReporter.error("Empty content returned", "Model returned empty or null content");
         }
 
         if (reasoning) {
@@ -274,8 +283,14 @@ export async function runLoop(userInput: string) {
             content: finalContent
         });
 
-        await inspectionReporter.invocationEnd("Agent loop completed.");
+        await inspectionReporter.invocationEnd(hasEmptyContent ? "Agent loop completed with empty content." : "Agent loop completed.");
 
         return finalContent;
+    }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        await inspectionReporter.error("Agent loop failed", errorMessage);
+        await inspectionReporter.invocationEnd("Agent loop failed with error.");
+        throw error;
     }
 }
