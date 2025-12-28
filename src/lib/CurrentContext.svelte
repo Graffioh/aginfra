@@ -1,6 +1,11 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import ContextUsageBar from "./ContextUsageBar.svelte";
+  import {
+    setSnapshotContext,
+    setSnapshotToolDefinitions,
+    setSnapshotTokenUsage,
+  } from "../utils/inspectionSnapshotState";
   import type {
     AgentToolDefinition,
     ContextMessage,
@@ -123,6 +128,7 @@
       if (contextResponse.ok) {
         const currentContext = await contextResponse.json();
         context = currentContext;
+        setSnapshotContext(context);
       } else {
         console.error("Failed to refresh context", contextResponse.status);
       }
@@ -130,6 +136,7 @@
       if (tokenResponse.ok) {
         const currentTokenUsage = await tokenResponse.json();
         tokenUsage = currentTokenUsage;
+        setSnapshotTokenUsage(tokenUsage);
       } else {
         console.error("Failed to refresh token usage", tokenResponse.status);
       }
@@ -137,6 +144,7 @@
       if (toolsResponse.ok) {
         const currentTools = await toolsResponse.json();
         toolDefinitions = currentTools;
+        setSnapshotToolDefinitions(toolDefinitions);
       } else {
         console.error("Failed to refresh tool definitions", toolsResponse.status);
       }
@@ -164,6 +172,7 @@
       try {
         const newContext = JSON.parse(event.data);
         context = newContext;
+        setSnapshotContext(context);
       } catch (e) {
         console.error("Failed to parse context data:", e);
       }
@@ -180,6 +189,7 @@
         const data = JSON.parse(event.data);
         if (data.totalTokens !== undefined) {
           tokenUsage = data;
+          setSnapshotTokenUsage(tokenUsage);
         }
       } catch (e) {
         console.error("Failed to parse token data:", e);
@@ -196,6 +206,7 @@
       try {
         const tools = JSON.parse(event.data);
         toolDefinitions = tools;
+        setSnapshotToolDefinitions(toolDefinitions);
       } catch (e) {
         console.error("Failed to parse tool definitions data:", e);
       }

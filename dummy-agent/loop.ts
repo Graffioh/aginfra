@@ -72,6 +72,7 @@ export async function runLoop(userInput: string) {
     await updateContext({ role: "user", content: userInput });
 
     await inspectionReporter.invocationStart("Agent is processing the user input...");
+    await inspectionReporter.tools(toolDefinitions);
 
     try {
     let iteration = 0;

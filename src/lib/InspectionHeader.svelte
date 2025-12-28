@@ -73,7 +73,7 @@
     >
       clear
     </button>
-    <DownloadSnapshot {events} />
+    <DownloadSnapshot {events} {modelName} />
     <div 
       class="error-rate-pill" 
       class:has-errors={errorRate > 0}
