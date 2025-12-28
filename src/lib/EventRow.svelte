@@ -118,7 +118,9 @@
                     ? 'timing-label'
                     : child.label === InspectionEventLabel.TokenUsage
                       ? 'token-usage-label'
-                      : ''}"
+                      : child.label === InspectionEventLabel.ToolCalls
+                        ? 'tool-calls-label'
+                        : ''}"
               >
                 {child.label}
               </div>
@@ -308,6 +310,10 @@
 
   .child-label.token-usage-label {
     color: #ec4899;
+  }
+
+  .child-label.tool-calls-label {
+    color: #d2a8ff;
   }
 
   .child-data {
