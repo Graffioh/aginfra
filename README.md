@@ -178,21 +178,14 @@ You can export the current inspection state to share or analyze later, and impor
 
 ### Export snapshot
 
-Click the "export ⬇" button in the inspection header to download the current state. Two formats are available:
+Click the "export ↓" button in the inspection header to download the current state. Two formats are available:
 
 - **JSON** ➜ Full machine-readable snapshot that can be imported back into maid for further analysis
 - **TXT** ➜ Human-readable format for easy sharing and review
 
-The snapshot includes:
-- All inspection events and traces
-- Token usage statistics
-- Available tool definitions
-- Context messages
-- Model name and metadata
-
 ### Import snapshot
 
-Click the "import ⬆" button to load a previously exported JSON snapshot. This restores the complete inspection state, allowing you to review and analyze historical agent behavior without reconnecting to a running agent.
+Click the "import ↑" button to load a previously exported JSON snapshot. This restores the complete inspection state, allowing you to review and analyze historical agent behavior without reconnecting to a running agent.
 
 The import validates the snapshot format (MAID Snapshot v1.0) and ensures data integrity before loading.
 
