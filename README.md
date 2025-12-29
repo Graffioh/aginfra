@@ -9,7 +9,7 @@ my agent is dumb (maid) is a telemetry dev tool to inspect your agent behavior v
 
 *(Under development)*
 
-## Why this and not LangSmith?
+## Why this and not other solutions?
 
 1) Open source
 2) It's customizable based on your needs
