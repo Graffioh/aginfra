@@ -87,62 +87,64 @@
 </script>
 
 <div class="row" class:highlighted class:hasError class:hasToolCalls data-event-id={event.id}>
-  <div class="ts">{new Date(event.ts).toLocaleTimeString()}</div>
-  <div class="data-container">
-    {#if multiline}
-      <button class="expand-button" onclick={() => onToggleExpand(event.id)}>
-        <span class="arrow {isExpanded ? 'expanded' : ''}">▶</span>
-      </button>
-    {/if}
-    <div class="data-content">
-      <div class="data-with-badge">
-        <pre class="data {isExpanded ? '' : 'collapsed'}">{isExpanded ||
-          !multiline
-            ? event.data
-            : getFirstLine(event.data)}</pre>
-        {#if hasReasoning}
-          <span class="reasoning-badge" title="Contains reasoning details"
-            >R</span
-          >
-        {/if}
-        {#if hasTiming && timingData}
-          <span class="timing-badge" title="Tool execution time"
-            >{timingData}</span
-          >
-        {/if}
-        {#if tokenUsageBadge}
-          <span
-            class="token-usage-badge"
-            title={tokenUsageData || "Token usage"}
-            >{tokenUsageBadge} tokens</span
-          >
+  <button class="row-content" onclick={() => onToggleExpand(event.id)}>
+    <div class="ts">{new Date(event.ts).toLocaleTimeString()}</div>
+    <div class="data-container">
+      {#if multiline}
+        <span class="expand-button">
+          <span class="arrow {isExpanded ? 'expanded' : ''}">▶</span>
+        </span>
+      {/if}
+      <div class="data-content">
+        <div class="data-with-badge">
+          <pre class="data {isExpanded ? '' : 'collapsed'}">{isExpanded ||
+            !multiline
+              ? event.data
+              : getFirstLine(event.data)}</pre>
+          {#if hasReasoning}
+            <span class="reasoning-badge" title="Contains reasoning details"
+              >R</span
+            >
+          {/if}
+          {#if hasTiming && timingData}
+            <span class="timing-badge" title="Tool execution time"
+              >{timingData}</span
+            >
+          {/if}
+          {#if tokenUsageBadge}
+            <span
+              class="token-usage-badge"
+              title={tokenUsageData || "Token usage"}
+              >{tokenUsageBadge} tokens</span
+            >
+          {/if}
+        </div>
+        {#if isExpanded && hasChildren}
+          <div class="children {hasReasoning ? 'has-reasoning' : ''}">
+            {#each event.inspectionEvent.children as child}
+              <div class="child">
+                <div
+                  class="child-label {child.label ===
+                  InspectionEventLabel.Reasoning
+                    ? 'reasoning-label'
+                    : child.label === InspectionEventLabel.Timing
+                      ? 'timing-label'
+                      : child.label === InspectionEventLabel.TokenUsage
+                        ? 'token-usage-label'
+                        : child.label === InspectionEventLabel.ToolCalls
+                          ? 'tool-calls-label'
+                          : ''}"
+                >
+                  {child.label}
+                </div>
+                <pre class="child-data">{child.data}</pre>
+              </div>
+            {/each}
+          </div>
         {/if}
       </div>
-      {#if isExpanded && hasChildren}
-        <div class="children {hasReasoning ? 'has-reasoning' : ''}">
-          {#each event.inspectionEvent.children as child}
-            <div class="child">
-              <div
-                class="child-label {child.label ===
-                InspectionEventLabel.Reasoning
-                  ? 'reasoning-label'
-                  : child.label === InspectionEventLabel.Timing
-                    ? 'timing-label'
-                    : child.label === InspectionEventLabel.TokenUsage
-                      ? 'token-usage-label'
-                      : child.label === InspectionEventLabel.ToolCalls
-                        ? 'tool-calls-label'
-                        : ''}"
-              >
-                {child.label}
-              </div>
-              <pre class="child-data">{child.data}</pre>
-            </div>
-          {/each}
-        </div>
-      {/if}
     </div>
-  </div>
+  </button>
   <div class="remove-container">
     <button
       class="warning-mark-button {event.warningMarked ? 'warning-marked' : ''}"
@@ -163,14 +165,34 @@
 
 <style>
   .row {
-    display: grid;
-    grid-template-columns: 90px 1fr auto;
+    display: flex;
     gap: 10px;
     padding: 6px 0;
     border-bottom: 1px solid rgba(214, 214, 214, 0.153);
     transition:
       background-color 0.3s ease,
       border-color 0.3s ease;
+  }
+
+  .row-content {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    align-items: flex-start;
+    transition: background 0.2s;
+    border-radius: 4px;
+  }
+
+  .row-content:hover {
+    background: rgba(230, 237, 243, 0.05);
   }
 
   .row.highlighted {
@@ -180,6 +202,10 @@
     padding-left: 3px;
   }
 
+  .row.highlighted .row-content:hover {
+    background: rgba(230, 237, 243, 0.08);
+  }
+
   .row.hasError {
     background-color: rgba(248, 81, 73, 0.12);
     border-bottom-color: rgba(248, 81, 73, 0.35);
@@ -187,11 +213,19 @@
     padding-left: 3px;
   }
 
+  .row.hasError .row-content:hover {
+    background: rgba(248, 81, 73, 0.05);
+  }
+
   .row.hasToolCalls {
     background-color: rgba(210, 168, 255, 0.12);
     border-bottom-color: rgba(210, 168, 255, 0.35);
     border-left: 3px solid rgba(210, 168, 255, 0.6);
     padding-left: 3px;
+  }
+
+  .row.hasToolCalls .row-content:hover {
+    background: rgba(210, 168, 255, 0.05);
   }
 
   .ts {
@@ -209,16 +243,11 @@
     background: none;
     border: none;
     padding: 0;
-    cursor: pointer;
     color: rgba(230, 237, 243, 0.65);
     display: flex;
     align-items: center;
     flex-shrink: 0;
     margin-top: 2px;
-  }
-
-  .expand-button:hover {
-    color: #e6edf3;
   }
 
   .arrow {
@@ -356,9 +385,9 @@
 
   .remove-container {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    align-items: flex-start;
     gap: 6px;
+    flex-shrink: 0;
   }
 
   .warning-mark-button {
@@ -376,6 +405,7 @@
     transition: all 0.2s;
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
   }
 
   .warning-mark-button:hover {
@@ -410,6 +440,7 @@
     transition: all 0.2s;
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
   }
 
   .remove-button:hover {

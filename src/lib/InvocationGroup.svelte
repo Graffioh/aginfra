@@ -54,14 +54,14 @@
 
 <div class="invocation-group" class:highlighted={hasHighlighted && !isExpanded}>
   <div class="group-header">
-    <span class="group-time">
-      {new Date(group.firstTs).toLocaleTimeString()}
-    </span>
     <button
       class="group-toggle"
       type="button"
       onclick={onToggle}
     >
+      <span class="group-time">
+        {new Date(group.firstTs).toLocaleTimeString()}
+      </span>
       <span class="group-arrow" class:expanded={isExpanded}>▶</span>
       <span class="group-id" title={group.invocationId}>
         {group.invocationId.slice(0, 8)}
@@ -126,14 +126,6 @@
     background: rgba(88, 166, 255, 0.15);
   }
 
-  .group-time {
-    font-size: 12px;
-    color: rgba(230, 237, 243, 0.65);
-    font-family: monospace;
-    flex-shrink: 0;
-    width: 80px;
-  }
-
   .group-toggle {
     display: flex;
     align-items: center;
@@ -146,6 +138,13 @@
     text-align: left;
     font: inherit;
     color: #e6edf3;
+  }
+
+  .group-time {
+    font-size: 12px;
+    color: rgba(230, 237, 243, 0.65);
+    font-family: monospace;
+    flex-shrink: 0;
   }
 
   .group-arrow {
