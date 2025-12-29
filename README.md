@@ -170,7 +170,31 @@ The error rate is calculated client-side from persisted events, so it survives s
 
 All protocol types are available in `protocol/types.ts`.
 
-You can check the agent implementation in `/dummy-agent` and `/reporter` as a reference. 
+You can check the agent implementation in `/dummy-agent` and `/reporter` as a reference.
+
+## Export & Import snapshots
+
+You can export the current inspection state to share or analyze later, and import previously saved snapshots to restore the state.
+
+### Export snapshot
+
+Click the "export ⬇" button in the inspection header to download the current state. Two formats are available:
+
+- **JSON** ➜ Full machine-readable snapshot that can be imported back into maid for further analysis
+- **TXT** ➜ Human-readable format for easy sharing and review
+
+The snapshot includes:
+- All inspection events and traces
+- Token usage statistics
+- Available tool definitions
+- Context messages
+- Model name and metadata
+
+### Import snapshot
+
+Click the "import ⬆" button to load a previously exported JSON snapshot. This restores the complete inspection state, allowing you to review and analyze historical agent behavior without reconnecting to a running agent.
+
+The import validates the snapshot format (MAID Snapshot v1.0) and ensures data integrity before loading.
 
 ## Integrating with the help of a coding agent
 
