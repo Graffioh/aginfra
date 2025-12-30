@@ -113,8 +113,6 @@
   .group-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
     background: rgba(88, 166, 255, 0.08);
     transition: background 0.2s;
   }
@@ -128,7 +126,7 @@
     align-items: center;
     gap: 10px;
     flex: 1;
-    padding: 0;
+    padding: 8px 12px;
     background: none;
     border: none;
     cursor: pointer;
@@ -216,6 +214,7 @@
     width: 24px;
     height: 24px;
     flex-shrink: 0;
+    margin-right: 12px;
   }
 
   .remove-button:hover {
