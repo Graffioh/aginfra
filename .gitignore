@@ -26,3 +26,8 @@ dist-ssr
 *.env
 
 maid-snapshot*
+
+.agents/skills/playwright-skill/node_modules
+.agents/skills/playwright-skill/.temp*
+.agents/skills/playwright-skill/package*
+

@@ -143,7 +143,7 @@
     highlightedEventId = null;
     save("events", events);
     save("eventId", eventId);
-    snapshot.events = events;
+    snapshot.reset();
   }
 
   function handleImport(importedSnapshot: MaidSnapshot) {
