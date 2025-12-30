@@ -97,52 +97,6 @@
   const INSPECTION_URL =
     import.meta.env.VITE_INSPECTION_URL ?? "http://localhost:6969/api";
 
-  async function refreshContext(e: MouseEvent) {
-    e.stopPropagation();
-
-    try {
-      const [contextResponse, tokenResponse, toolsResponse] = await Promise.all(
-        [
-          fetch(INSPECTION_URL + "/inspection/context/current", {
-            method: "GET",
-            cache: "no-store",
-          }),
-          fetch(INSPECTION_URL + "/inspection/tokens/current", {
-            method: "GET",
-            cache: "no-store",
-          }),
-          fetch(INSPECTION_URL + "/inspection/tools/current", {
-            method: "GET",
-            cache: "no-store",
-          }),
-        ]
-      );
-
-      if (contextResponse.ok) {
-        const currentContext = await contextResponse.json();
-        snapshot.context = currentContext;
-      } else {
-        console.error("Failed to refresh context", contextResponse.status);
-      }
-
-      if (tokenResponse.ok) {
-        const currentTokenUsage = await tokenResponse.json();
-        snapshot.tokenUsage = currentTokenUsage;
-      } else {
-        console.error("Failed to refresh token usage", tokenResponse.status);
-      }
-
-      if (toolsResponse.ok) {
-        const currentTools = await toolsResponse.json();
-        snapshot.toolDefinitions = currentTools;
-      } else {
-        console.error("Failed to refresh tool definitions", toolsResponse.status);
-      }
-    } catch (error) {
-      console.error("Error refreshing context:", error);
-    }
-  }
-
   function formatTokens(num: number | null): string {
     if (num === null) {
       return "?";
@@ -236,13 +190,7 @@
         )} tokens</span
       >
     </div>
-    <button
-      class="refresh-context-button"
-      onclick={refreshContext}
-      title="Refresh context"
-    >
-      ↻
-    </button>
+
   </div>
 
   {#if contextExpanded}
@@ -365,32 +313,6 @@
     padding: 2px 8px;
     border-radius: 4px;
     margin-left: 8px;
-  }
-
-  .refresh-context-button {
-    background: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-    color: #c9d1d9;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-    min-width: 28px;
-  }
-
-  .refresh-context-button:hover {
-    border-color: rgba(88, 166, 255, 0.7);
-    color: #79c0ff;
-    background: rgba(88, 166, 255, 0.1);
-  }
-
-  .refresh-context-button:active {
-    background: rgba(88, 166, 255, 0.2);
   }
 
   .context-content {
