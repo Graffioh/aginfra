@@ -205,13 +205,9 @@ https://github.com/user-attachments/assets/9d4e250a-2d31-44c0-9e8e-6a1c406af7a2
 
 ### Visual
 
-<img width="1512" height="882" alt="new-maid-screen" src="https://github.com/user-attachments/assets/4f95ea99-baa8-4828-b63f-cdf8925168a1" />
-
-
+<img width="1512" height="879" alt="maid-new-visual" src="https://github.com/user-attachments/assets/c7c281c2-4e3c-40ed-b6ee-1ff328a2a051" />
 
 ### Demo
-
-
 
 https://github.com/user-attachments/assets/5f740626-092a-4464-a594-a59f03c9cc12
 
