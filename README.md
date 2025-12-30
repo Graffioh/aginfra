@@ -34,11 +34,13 @@ my agent is dumb (maid) is a telemetry dev tool to inspect your agent behavior v
 
 ## Tracking your own agent
 
-Before starting your own agent loop, a client that calls inspection backend needs to be instantiated.
+How it works?
 
-If you want (and use typescript for the agent), you can import/copy `InspectorReporter` (present in `/reporter`) directly into your agent code and then use the various functions to send informations (check the code to understand more).
+You have at your disposal methods present in the `InspectorReporter` (`/reporter`) that can be used as *manual hooks* during your agent loop lifecycle.
 
-If you don't use typescript, just adapt the code based on your programming language of choice.
+You can treat these methods as enhanced console logs.
+
+Note: If you don't use typescript, just adapt the code present in the reporter based on your programming language of choice.
 
 ### What to pass to the inspector for reporting
 
