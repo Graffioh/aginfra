@@ -9,10 +9,16 @@
 
   interface Props {
     events: InspectionEventDisplay[];
+    filteredEvents?: InspectionEventDisplay[];
     onSelectEvent?: (eventIndex: number) => void;
   }
 
-  let { events, onSelectEvent }: Props = $props();
+  let { events, filteredEvents, onSelectEvent }: Props = $props();
+  
+  // Use filteredEvents if provided, otherwise show all
+  const visibleEventIds = $derived(
+    filteredEvents ? new Set(filteredEvents.map(e => e.id)) : null
+  );
 
   // Track selected bar index
   let selectedIndex = $state<number | null>(null);
@@ -22,7 +28,21 @@
 
   // Only compute latencies if loop markers are present
   const hasMarkers = $derived(hasLoopMarkers(events));
-  const latencies = $derived<number[]>(hasMarkers ? computeLatencies(events) : []);
+  const allLatencies = $derived<number[]>(hasMarkers ? computeLatencies(events) : []);
+  
+  // Filter latencies to only show bars for visible (filtered) events
+  const latencyData = $derived.by(() => {
+    if (!visibleEventIds) {
+      // No filter, show all
+      return allLatencies.map((latency, index) => ({ latency, originalIndex: index }));
+    }
+    // Filter to only include latencies for visible events
+    return allLatencies
+      .map((latency, index) => ({ latency, originalIndex: index, eventId: events[index]?.id }))
+      .filter(item => item.eventId !== undefined && visibleEventIds.has(item.eventId));
+  });
+  
+  const latencies = $derived(latencyData.map(d => d.latency));
   const maxLatency = $derived(
     latencies.length > 0 ? Math.max(...latencies) : 0
   );
@@ -85,20 +105,24 @@
     }
   }
 
-  function handleSelect(index: number) {
-    selectedIndex = index;
-    onSelectEvent?.(index);
+  function handleSelect(displayIndex: number) {
+    selectedIndex = displayIndex;
+    // Use the original index for the callback
+    const originalIndex = latencyData[displayIndex]?.originalIndex;
+    if (originalIndex !== undefined) {
+      onSelectEvent?.(originalIndex);
+    }
   }
 
   function handleSelectMax() {
-    // Find the index of the max latency
-    const maxIndex = latencies.indexOf(maxLatency);
-    if (maxIndex !== -1) {
-      handleSelect(maxIndex);
+    // Find the display index of the max latency
+    const maxDisplayIndex = latencies.indexOf(maxLatency);
+    if (maxDisplayIndex !== -1) {
+      handleSelect(maxDisplayIndex);
       // Scroll to the max latency bar
       if (barsContainer) {
         const barWidth = 45 + 2; // bar width + gap
-        const targetScroll = maxIndex * barWidth - barsContainer.clientWidth / 2 + barWidth / 2;
+        const targetScroll = maxDisplayIndex * barWidth - barsContainer.clientWidth / 2 + barWidth / 2;
         barsContainer.scrollTo({ left: targetScroll, behavior: 'smooth' });
       }
     }

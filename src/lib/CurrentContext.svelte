@@ -78,7 +78,7 @@
     const currentContextTokens = systemTokens + toolTokens + conversationTokens;
 
     // Get context limits from API
-    const limit = tokenUsage.contextLimit || 100000;
+    const limit = tokenUsage.contextLimit || 200000;
     const hasContextLimit = tokenUsage.contextLimit !== null;
 
     const remaining = Math.max(0, limit - currentContextTokens);

@@ -6,6 +6,8 @@
   import type { MaidSnapshot } from "../../protocol/types";
   import type { ViewMode } from "../utils/snapshot.svelte";
 
+  export type LabelFilter = "all" | "tools" | "errors";
+
   interface Props {
     modelName: string;
     status: "connecting" | "connected" | "error";
@@ -13,9 +15,11 @@
     events: InspectionEventDisplay[];
     errorRate: number;
     viewMode: ViewMode;
+    labelFilter: LabelFilter;
     onDeleteAll: () => void;
     onImport: (snapshot: MaidSnapshot) => void;
     onSwitchToRealtime: () => void;
+    onLabelFilterChange: (filter: LabelFilter) => void;
   }
 
   let {
@@ -25,9 +29,11 @@
     events = [],
     errorRate = 0,
     viewMode = "realtime",
+    labelFilter = "all",
     onDeleteAll,
     onImport,
     onSwitchToRealtime,
+    onLabelFilterChange,
   }: Props = $props();
 
   let showConfirmDialog = $state(false);
@@ -108,6 +114,16 @@
     >
       clear
     </button>
+    <select
+      class="label-filter-dropdown"
+      value={labelFilter}
+      onchange={(e) => onLabelFilterChange(e.currentTarget.value as LabelFilter)}
+      title="Filter events by label"
+    >
+      <option value="all">All</option>
+      <option value="tools">Tools</option>
+      <option value="errors">Errors</option>
+    </select>
     <ImportSnapshot {onImport} />
     <DownloadSnapshot />
     <div 
@@ -303,5 +319,30 @@
   .delete-events-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .label-filter-dropdown {
+    background: rgb(0, 0, 0);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: #c9d1d9;
+    font-size: 12px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .label-filter-dropdown:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .label-filter-dropdown:focus {
+    outline: none;
+    border-color: rgba(136, 192, 208, 0.6);
+  }
+
+  .label-filter-dropdown option {
+    background: #1e1e1e;
+    color: #c9d1d9;
   }
 </style>

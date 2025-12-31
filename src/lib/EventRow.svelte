@@ -302,7 +302,7 @@
     border: 1px solid rgba(255, 149, 0, 0.3);
     line-height: 1;
     margin-top: 2px;
-    cursor: help;
+    cursor: pointer;
   }
 
   .timing-badge {
@@ -316,7 +316,7 @@
     border: 1px solid rgba(46, 160, 67, 0.3);
     line-height: 1;
     margin-top: 2px;
-    cursor: help;
+    cursor: pointer;
     font-family: monospace;
   }
 
@@ -331,7 +331,7 @@
     border: 1px solid rgba(236, 72, 153, 0.3);
     line-height: 1;
     margin-top: 2px;
-    cursor: help;
+    cursor: pointer;
     font-family: monospace;
   }
 

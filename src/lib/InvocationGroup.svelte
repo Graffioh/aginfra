@@ -168,7 +168,7 @@
     padding: 2px 6px;
     border-radius: 4px;
     line-height: 1;
-    cursor: help;
+    cursor: pointer;
     background: rgba(163, 113, 247, 0.15);
     color: #a371f7;
     border: 1px solid rgba(163, 113, 247, 0.3);
@@ -180,7 +180,7 @@
     padding: 2px 6px;
     border-radius: 4px;
     line-height: 1;
-    cursor: help;
+    cursor: pointer;
     background: rgba(248, 81, 73, 0.15);
     color: #ff7b72;
     border: 1px solid rgba(248, 81, 73, 0.4);

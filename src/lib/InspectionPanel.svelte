@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import CurrentContext from "./CurrentContext.svelte";
-  import InspectionHeader from "./InspectionHeader.svelte";
+  import InspectionHeader, { type LabelFilter } from "./InspectionHeader.svelte";
   import InspectionStream from "./InspectionStream.svelte";
   import LatencyHeatmap from "./LatencyHeatmap.svelte";
   import type { InspectionEventDisplay } from "../types";
@@ -16,11 +16,30 @@
   let eventId = $state(0);
   let modelName = $state<string>("");
   let highlightedEventId = $state<number | null>(null);
+  let labelFilter = $state<LabelFilter>("all");
 
   let traceEventSource: EventSource | null = null;
   let modelEventSource: EventSource | null = null;
   let agentStatusEventSource: EventSource | null = null;
   let highlightTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Filter events based on label filter
+  const filteredEvents = $derived.by(() => {
+    if (labelFilter === "all") return events;
+    
+    return events.filter((e) => {
+      const children = e.inspectionEvent.children;
+      if (!children) return false;
+      
+      if (labelFilter === "tools") {
+        return children.some((child) => child.label === InspectionEventLabel.ToolCalls);
+      }
+      if (labelFilter === "errors") {
+        return children.some((child) => child.label === InspectionEventLabel.Error);
+      }
+      return true;
+    });
+  });
 
   // Calculate error rate from events (derived from persisted events)
   const errorRate = $derived.by(() => {
@@ -312,19 +331,21 @@
     {events}
     {errorRate}
     viewMode={snapshot.viewMode}
+    {labelFilter}
     onDeleteAll={deleteAllEvents}
     onImport={handleImport}
     onSwitchToRealtime={switchToRealtime}
+    onLabelFilterChange={(filter) => labelFilter = filter}
   />
 
   {#if lastError}
     <div class="error">{lastError}</div>
   {/if}
 
-  <LatencyHeatmap {events} onSelectEvent={highlightEvent} />
+  <LatencyHeatmap {events} filteredEvents={filteredEvents} onSelectEvent={highlightEvent} />
 
   <InspectionStream
-    {events}
+    events={filteredEvents}
     {highlightedEventId}
     onToggleExpand={toggleExpand}
     onRemove={removeEventRow}
