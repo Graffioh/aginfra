@@ -263,27 +263,6 @@
 
   let selectedId = $state<number | null>(null);
   let hoveredId = $state<number | null>(null);
-  let llmBarsContainer = $state<HTMLDivElement | undefined>(undefined);
-  let toolBarsContainer = $state<HTMLDivElement | undefined>(undefined);
-
-  function syncScroll(source: HTMLDivElement, targets: HTMLDivElement[]) {
-    const left = source.scrollLeft;
-    for (const target of targets) {
-      if (target.scrollLeft !== left) {
-        target.scrollLeft = left;
-      }
-    }
-  }
-
-  function handleScroll(e: Event) {
-    const target = e.target as HTMLDivElement;
-    const targets: HTMLDivElement[] = [];
-    if (llmBarsContainer && target !== llmBarsContainer) targets.push(llmBarsContainer);
-    if (toolBarsContainer && target !== toolBarsContainer) targets.push(toolBarsContainer);
-    if (targets.length > 0) {
-      syncScroll(target, targets);
-    }
-  }
 
   function handleSelect(item: TimelineItem) {
     selectedId = item.id;
@@ -299,7 +278,7 @@
     <div class="timeline-header">
       <span class="timeline-title">Timeline</span>
       <span class="timeline-stats">
-        {totalItems} items • Duration: {formatLatency(totalDuration)}
+        {totalItems} items 
       </span>
     </div>
     
@@ -324,7 +303,6 @@
           <div class="track-label">LLM</div>
           <div
             class="track-bars"
-            bind:this={llmBarsContainer}
             style="height: {Math.max(28, timelineData.llmLaneCount * 24)}px; min-width: {trackWidth}px;"
           >
             {#each timelineData.llmItems as item (item.id)}
@@ -349,7 +327,6 @@
           <div class="track-label">Tools</div>
           <div
             class="track-bars"
-            bind:this={toolBarsContainer}
             style="height: {Math.max(28, timelineData.toolLaneCount * 24)}px; min-width: {trackWidth}px;"
           >
             {#each timelineData.toolItems as item (item.id)}

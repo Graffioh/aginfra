@@ -3,6 +3,7 @@
   import TimelineView from "./TimelineView.svelte";
   import type { InspectionEventDisplay } from "../types";
   import { InspectionEventLabel } from "../../protocol/types";
+  import { formatLatency } from "../utils/latency";
 
   export type InvocationGroupData = {
     invocationId: string;
@@ -58,6 +59,42 @@
     e.stopPropagation();
     showTimeline = !showTimeline;
   }
+
+  function percentile(sorted: number[], p: number): number {
+    if (sorted.length === 0) return 0;
+    const idx = (p / 100) * (sorted.length - 1);
+    const lower = Math.floor(idx);
+    const upper = Math.ceil(idx);
+    if (lower === upper) return sorted[lower];
+    return sorted[lower] + (sorted[upper] - sorted[lower]) * (idx - lower);
+  }
+
+  function getEventDuration(event: InspectionEventDisplay, index: number): number {
+    const children = event.inspectionEvent.children;
+    if (!children) return 200;
+    const timingChild = children.find(c => c.label === InspectionEventLabel.Timing);
+    if (timingChild) {
+      const match = timingChild.data.match(/(\d+(?:\.\d+)?)\s*(ms|s)/i);
+      if (match) {
+        let duration = parseFloat(match[1]);
+        if (match[2].toLowerCase() === 's') duration *= 1000;
+        return duration;
+      }
+    }
+    if (index < group.events.length - 1) {
+      return Math.max(group.events[index + 1].ts - event.ts, 100);
+    }
+    return 200;
+  }
+
+  const latencyPercentiles = $derived.by(() => {
+    const durations = group.events.map((e, i) => getEventDuration(e, i)).sort((a, b) => a - b);
+    return {
+      p50: percentile(durations, 50),
+      p95: percentile(durations, 95),
+      p99: percentile(durations, 99),
+    };
+  });
 </script>
 
 <div class="invocation-group" class:highlighted={hasHighlighted && !isExpanded}>
@@ -81,7 +118,7 @@
         <span class="error-badge" title="Error occurred">Error</span>
       {/if}
       <span class="group-meta">
-        {group.events.length} events • {formatDuration(group.firstTs, group.lastTs)}
+        {group.events.length} events • {formatDuration(group.firstTs, group.lastTs)} • p50: {formatLatency(latencyPercentiles.p50)} | p95: {formatLatency(latencyPercentiles.p95)} | p99: {formatLatency(latencyPercentiles.p99)}
       </span>
     </button>
     <div class="group-actions">
