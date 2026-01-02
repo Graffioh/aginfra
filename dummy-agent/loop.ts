@@ -14,7 +14,7 @@ import {
 
 const inspectionReporter = createHttpInspectionReporter();
 
-const DEFAULT_MODEL = "openai/gpt-oss-120b";
+const DEFAULT_MODEL = "openai/gpt-4o-mini";
 let currentModel = DEFAULT_MODEL;
 
 export async function clearContext() {

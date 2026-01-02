@@ -2,6 +2,7 @@
   import { evaluationManager } from "../managers/evaluation.svelte";
 
   const state = $derived(evaluationManager.state);
+  let promptExpanded = $state(false);
 
   function getScoreColor(score: number): string {
     if (score >= 8) return "#7ee787";
@@ -28,19 +29,21 @@
   </div>
 
   <div class="content">
-    <div class="system-prompt-section">
-      <label for="system-prompt">Custom Evaluation Prompt (optional)</label>
-      <textarea
-        id="system-prompt"
-        placeholder="Enter a custom evaluation prompt... (leave empty to use default)"
-        bind:value={evaluationManager.customSystemPrompt}
-        rows="3"
-      ></textarea>
-      <p class="hint">
-        If empty, the default evaluation criteria will be used.
-        <span class="hint-note">Note: If a custom prompt is set in the agent loop via the reporter, that one will be used instead.</span>
-      </p>
-    </div>
+    <details class="prompt-details" open={promptExpanded}>
+      <summary onclick={() => (promptExpanded = !promptExpanded)}>Custom Evaluation Prompt</summary>
+      <div class="system-prompt-section">
+        <textarea
+          id="system-prompt"
+          placeholder="Enter a custom evaluation prompt... (leave empty to use default)"
+          bind:value={evaluationManager.customSystemPrompt}
+          rows="3"
+        ></textarea>
+        <p class="hint">
+          If empty, the default evaluation criteria will be used.
+          <span class="hint-note">Note: If a custom prompt is set in the agent loop via the reporter, that one will be used instead.</span>
+        </p>
+      </div>
+    </details>
     {#if state.isLoading}
       <div class="loading">
         <div class="spinner"></div>
@@ -166,6 +169,50 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .prompt-details {
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .prompt-details > summary {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(230, 237, 243, 0.8);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .prompt-details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prompt-details > summary::before {
+    content: "▶";
+    font-size: 10px;
+    color: rgba(230, 237, 243, 0.5);
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .prompt-details[open] > summary::before {
+    transform: rotate(90deg);
+  }
+
+  .prompt-details > summary:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .prompt-details .system-prompt-section {
+    padding: 0 12px 12px;
+    margin-bottom: 0;
   }
 
   .system-prompt-section label {
