@@ -203,7 +203,7 @@ await inspectionReporter.evaluable(userInput, finalContent, requestTokenUsage); 
 
 Returns scores (1-10), overall score, summary, strengths, weaknesses, and suggestions.
 
-You can add a custom system prompt via the UI or when you call the `evaluate()` reporter method.
+You can add a custom system prompt via the UI or when you call the `evaluable()` reporter method.
 
 ## Integrating with the help of a coding agent
 
@@ -214,10 +214,6 @@ You can integrate maid to your custom agent loop by using a custom coding agent 
 ### Architecture
 
 <img width="1040" height="339" alt="maid-diagram" src="https://github.com/user-attachments/assets/75fd2936-ee9e-4e28-8907-74df9556b499" />
-
-### Visual
-
-<img width="1512" height="879" alt="maid-new-visual" src="https://github.com/user-attachments/assets/c7c281c2-4e3c-40ed-b6ee-1ff328a2a051" />
 
 ### Demo
 
