@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { evaluationStore } from "../stores/evaluation.svelte";
+  import { evaluationManager } from "../managers/evaluation.svelte";
 
-  const state = $derived(evaluationStore.state);
+  const state = $derived(evaluationManager.state);
 
   function getScoreColor(score: number): string {
     if (score >= 8) return "#7ee787";
@@ -28,6 +28,19 @@
   </div>
 
   <div class="content">
+    <div class="system-prompt-section">
+      <label for="system-prompt">Custom Evaluation Prompt (optional)</label>
+      <textarea
+        id="system-prompt"
+        placeholder="Enter a custom evaluation prompt... (leave empty to use default)"
+        bind:value={evaluationManager.customSystemPrompt}
+        rows="3"
+      />
+      <p class="hint">
+        If empty, the default evaluation criteria will be used.
+        <span class="hint-note">Note: If a custom prompt is set in the agent loop via the reporter, that one will be used instead.</span>
+      </p>
+    </div>
     {#if state.isLoading}
       <div class="loading">
         <div class="spinner"></div>
@@ -37,11 +50,11 @@
       <div class="error-state">
         <p class="error-title">Evaluation Failed</p>
         <p class="error-message">{state.error}</p>
-        <button class="retry-button" onclick={() => evaluationStore.clear()}>Dismiss</button>
+        <button class="retry-button" onclick={() => evaluationManager.clear()}>Dismiss</button>
       </div>
     {:else if state.result}
       <div class="evaluation">
-        <button class="clear-button" onclick={() => evaluationStore.clear()}>Clear Result</button>
+        <button class="clear-button" onclick={() => evaluationManager.clear()}>Clear Result</button>
         <div class="overall-score" style="--score-color: {getScoreColor(state.result.overallScore)}">
           <div class="score-value">{state.result.overallScore.toFixed(1)}</div>
           <div class="score-max">/10</div>
@@ -146,6 +159,54 @@
     flex: 1;
     overflow-y: auto;
     padding: 16px;
+  }
+
+  .system-prompt-section {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .system-prompt-section label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(230, 237, 243, 0.9);
+  }
+
+  .system-prompt-section textarea {
+    width: 100%;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: #e6edf3;
+    font-size: 12px;
+    resize: vertical;
+    min-height: 60px;
+    font-family: inherit;
+  }
+
+  .system-prompt-section textarea:focus {
+    outline: none;
+    border-color: rgba(121, 192, 255, 0.6);
+  }
+
+  .system-prompt-section textarea::placeholder {
+    color: rgba(230, 237, 243, 0.4);
+  }
+
+  .system-prompt-section .hint {
+    margin: 0;
+    font-size: 11px;
+    color: rgba(230, 237, 243, 0.4);
+  }
+
+  .system-prompt-section .hint .hint-note {
+    display: block;
+    margin-top: 4px;
+    color: rgba(121, 192, 255, 0.7);
+    font-style: italic;
   }
 
   .placeholder {

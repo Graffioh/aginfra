@@ -8,7 +8,7 @@ export type EvaluationState = {
   agentResponse: string | null;
 };
 
-function createEvaluationStore() {
+function createEvaluationManager() {
   let state = $state<EvaluationState>({
     isLoading: false,
     result: null,
@@ -17,46 +17,47 @@ function createEvaluationStore() {
     agentResponse: null,
   });
 
+  let customSystemPrompt = $state("");
+
   return {
     get state() {
       return state;
     },
-    async evaluate(userQuery: string, agentResponse: string): Promise<EvaluationResult | null> {
-      console.log("[evaluate] Starting evaluation...");
-      console.log("[evaluate] userQuery:", userQuery);
-      console.log("[evaluate] agentResponse:", agentResponse.slice(0, 100));
-      
+    get customSystemPrompt() {
+      return customSystemPrompt;
+    },
+    setCustomSystemPrompt(prompt: string) {
+      customSystemPrompt = prompt;
+    },
+    async evaluate(userQuery: string, agentResponse: string, systemPrompt?: string): Promise<EvaluationResult | null> {
       state.isLoading = true;
       state.error = null;
       state.result = null;
       state.userQuery = userQuery;
       state.agentResponse = agentResponse;
 
+      // Use event's system prompt first, then fall back to custom system prompt
+      const effectiveSystemPrompt = systemPrompt || (customSystemPrompt.trim() || undefined);
+
       try {
-        console.log("[evaluate] Sending fetch request...");
-        const response = await fetch("http://127.0.0.1:6969/api/inspection/evaluate", {
+        const response = await fetch("http://localhost:6969/api/inspection/evaluate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userQuery, agentResponse }),
+          body: JSON.stringify({ userQuery, agentResponse, systemPrompt: effectiveSystemPrompt }),
         });
-        console.log("[evaluate] Response received, status:", response.status);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          console.log("[evaluate] Error response:", errorData);
           throw new Error(errorData.error || `HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("[evaluate] Success! Evaluation result:", data.evaluation);
         state.result = data.evaluation;
         return data.evaluation;
       } catch (e) {
-        console.error("[evaluate] Error:", e);
         state.error = e instanceof Error ? e.message : "Evaluation failed";
         return null;
       } finally {
-        console.log("[evaluate] Done, isLoading set to false");
         state.isLoading = false;
       }
     },
@@ -69,4 +70,4 @@ function createEvaluationStore() {
   };
 }
 
-export const evaluationStore = createEvaluationStore();
+export const evaluationManager = createEvaluationManager();

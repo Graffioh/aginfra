@@ -307,6 +307,13 @@ export async function runLoop(userInput: string, model: string = DEFAULT_MODEL) 
             await inspectionReporter.error("Empty content returned", "Model returned empty or null content");
         }
 
+        // Mark the response as evaluable with a custom system prompt (optional)
+        // await inspectionReporter.evaluable(userInput, finalContent, requestTokenUsage, `
+        //   You are evaluating an AI assistant's response focused on code correctness.
+        //   USER QUERY: {userQuery}
+        //   AGENT RESPONSE: {agentResponse}
+        //   Rate 1-10 on correctness and provide feedback.
+        // `);
         await inspectionReporter.evaluable(userInput, finalContent, requestTokenUsage);
 
         await updateContext({

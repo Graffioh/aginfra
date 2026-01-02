@@ -64,7 +64,7 @@ type InspectionReporter = {
     invocationStart: (message?: string) => Promise<void>;
     invocationEnd: (message?: string) => Promise<void>;
     error: (message: string, details?: string) => Promise<void>;
-    evaluable: (userQuery: string, agentResponse: string, tokenUsage?: TokenUsage | null) => Promise<void>;
+    evaluable: (userQuery: string, agentResponse: string, tokenUsage?: TokenUsage | null, evaluationSystemPrompt?: string) => Promise<void>;
 };
 
 export function createHttpInspectionReporter(
@@ -163,7 +163,7 @@ export function createHttpInspectionReporter(
             await send(SSEEventType.Trace, event);
         },
 
-        async evaluable(userQuery: string, agentResponse: string, tokenUsage?: TokenUsage | null): Promise<void> {
+        async evaluable(userQuery: string, agentResponse: string, tokenUsage?: TokenUsage | null, evaluationSystemPrompt?: string): Promise<void> {
             console.log("Sending evaluable trace:", agentResponse.slice(0, 50));
             let children: Array<{ label: InspectionEventLabel; data: string }> = [
                 { label: InspectionEventLabel.Content, data: agentResponse }
@@ -185,6 +185,7 @@ export function createHttpInspectionReporter(
                 children,
                 evaluable: true,
                 userQuery,
+                evaluationSystemPrompt,
             };
             await send(SSEEventType.Trace, event);
         },

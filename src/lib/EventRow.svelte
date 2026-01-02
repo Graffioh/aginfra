@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { InspectionEventDisplay } from "../types";
   import { InspectionEventLabel } from "../../protocol/types";
-  import { evaluationStore } from "../stores/evaluation.svelte";
+  import { evaluationManager } from "../managers/evaluation.svelte";
 
   interface Props {
     event: InspectionEventDisplay;
@@ -19,17 +19,18 @@
 
   const isEvaluable = $derived(!!event.inspectionEvent.evaluable);
   const userQuery = $derived(event.inspectionEvent.userQuery || "");
-  const isEvaluating = $derived(evaluationStore.state.isLoading);
+  const evaluationSystemPrompt = $derived(event.inspectionEvent.evaluationSystemPrompt || undefined);
+  const isEvaluating = $derived(evaluationManager.state.isLoading);
 
   async function handleEvaluate() {
     if (!isEvaluable) return;
-    
+
     const contentChild = event.inspectionEvent.children?.find(
       (child) => child.label === InspectionEventLabel.Content
     );
     const agentResponse = contentChild?.data || event.data;
-    
-    await evaluationStore.evaluate(userQuery, agentResponse);
+
+    await evaluationManager.evaluate(userQuery, agentResponse, evaluationSystemPrompt);
   }
 
   function getFirstLine(data: string): string {
@@ -58,12 +59,6 @@
     event.inspectionEvent.children?.find(
       (child) => child.label === InspectionEventLabel.Timing
     )?.data || null
-  );
-  const hasTokenUsage = $derived(
-    hasChildren &&
-      event.inspectionEvent.children?.some(
-        (child) => child.label === InspectionEventLabel.TokenUsage
-      )
   );
   const hasError = $derived(
     hasChildren &&

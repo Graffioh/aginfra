@@ -202,7 +202,7 @@ app.get("/api/inspection/tools/current", (req: Request, res: Response) => {
 
 app.post("/api/inspection/evaluate", async (req: Request, res: Response) => {
   try {
-    const { userQuery, agentResponse } = req.body as { userQuery: string; agentResponse: string };
+    const { userQuery, agentResponse, systemPrompt } = req.body as { userQuery: string; agentResponse: string; systemPrompt?: string };
 
     if (!userQuery || !agentResponse) {
       return res.status(400).json({ error: "userQuery and agentResponse are required" });
@@ -213,7 +213,7 @@ app.post("/api/inspection/evaluate", async (req: Request, res: Response) => {
       return res.status(500).json({ error: "OPENROUTER_API_KEY not configured" });
     }
 
-    const evaluationPrompt = `You are an expert evaluator assessing the quality of an AI assistant's response.
+    const defaultEvaluationPrompt = `You are an expert evaluator assessing the quality of an AI assistant's response.
 
 USER QUERY:
 ${userQuery}
@@ -243,6 +243,8 @@ Respond ONLY with valid JSON in this exact format:
   "weaknesses": ["<weakness1>", "<weakness2>"],
   "suggestions": ["<suggestion1>", "<suggestion2>"]
 }`;
+
+    const evaluationPrompt = systemPrompt || defaultEvaluationPrompt;
 
     const llmResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
