@@ -35,7 +35,7 @@
         placeholder="Enter a custom evaluation prompt... (leave empty to use default)"
         bind:value={evaluationManager.customSystemPrompt}
         rows="3"
-      />
+      ></textarea>
       <p class="hint">
         If empty, the default evaluation criteria will be used.
         <span class="hint-note">Note: If a custom prompt is set in the agent loop via the reporter, that one will be used instead.</span>

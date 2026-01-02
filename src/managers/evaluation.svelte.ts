@@ -26,6 +26,9 @@ function createEvaluationManager() {
     get customSystemPrompt() {
       return customSystemPrompt;
     },
+    set customSystemPrompt(value: string) {
+      customSystemPrompt = value;
+    },
     setCustomSystemPrompt(prompt: string) {
       customSystemPrompt = prompt;
     },

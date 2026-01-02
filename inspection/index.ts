@@ -213,22 +213,14 @@ app.post("/api/inspection/evaluate", async (req: Request, res: Response) => {
       return res.status(500).json({ error: "OPENROUTER_API_KEY not configured" });
     }
 
-    const defaultEvaluationPrompt = `You are an expert evaluator assessing the quality of an AI assistant's response.
-
-USER QUERY:
-${userQuery}
-
-AGENT RESPONSE:
-${agentResponse}
-
-Evaluate the response on these criteria (1-10 scale):
+    const defaultInstructions = `Evaluate the response on these criteria (1-10 scale):
 1. Correctness - Is the information accurate?
 2. Completeness - Does it fully address the query?
 3. Clarity - Is it clear and well-structured?
 4. Relevance - Does it stay on topic?
-5. Helpfulness - Does it actually help the user?
+5. Helpfulness - Does it actually help the user?`;
 
-Respond ONLY with valid JSON in this exact format:
+    const responseFormat = `Respond ONLY with valid JSON in this exact format:
 {
   "scores": {
     "correctness": <number>,
@@ -244,7 +236,17 @@ Respond ONLY with valid JSON in this exact format:
   "suggestions": ["<suggestion1>", "<suggestion2>"]
 }`;
 
-    const evaluationPrompt = systemPrompt || defaultEvaluationPrompt;
+    const evaluationPrompt = `You are an expert evaluator assessing the quality of an AI assistant's response.
+
+USER QUERY:
+${userQuery}
+
+AGENT RESPONSE:
+${agentResponse}
+
+${systemPrompt ? `CUSTOM EVALUATION INSTRUCTIONS:\n${systemPrompt}\n\n` : defaultInstructions}
+
+${responseFormat}`;
 
     const llmResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -267,6 +269,7 @@ Respond ONLY with valid JSON in this exact format:
 
     const llmData = await llmResponse.json() as { choices: { message: { content: string } }[] };
     const content = llmData.choices?.[0]?.message?.content;
+    console.log("evaluation CONTENT: ", content)
 
     if (!content) {
       return res.status(500).json({ error: "No response from LLM" });
