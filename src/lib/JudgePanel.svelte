@@ -258,7 +258,7 @@
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
-    color: rgba(201, 209, 217, 0.7);
+    color: white;
     list-style: none;
     display: flex;
     align-items: center;
@@ -339,6 +339,7 @@
   .placeholder p {
     margin: 0;
     font-size: 13px;
+    color: white;
   }
 
   .placeholder .hint {
@@ -399,7 +400,7 @@
     background: none;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 4px;
-    color: rgba(201, 209, 217, 0.7);
+    color: white;
     padding: 4px 12px;
     cursor: pointer;
     font-size: 12px;
@@ -415,7 +416,7 @@
   .retry-button:hover {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.5);
-    color: rgba(201, 209, 217, 0.9);
+    color: white;
   }
 
   .evaluation {
@@ -496,7 +497,7 @@
     margin: 0 0 8px 0;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(201, 209, 217, 0.7);
+    color: white;
     text-transform: uppercase;
   }
 
@@ -545,12 +546,12 @@
     padding: 10px 12px;
     cursor: pointer;
     font-size: 12px;
-    color: rgba(201, 209, 217, 0.6);
+    color: white;
     transition: color 0.15s;
   }
 
   .context-section summary:hover {
-    color: rgba(201, 209, 217, 0.9);
+    color: white;
   }
 
   .context-content {
@@ -597,7 +598,7 @@
     background: none;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 4px;
-    color: rgba(201, 209, 217, 0.7);
+    color: white;
     padding: 4px 12px;
     cursor: pointer;
     font-size: 12px;
@@ -607,6 +608,6 @@
   .export-button:hover {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.5);
-    color: rgba(201, 209, 217, 0.9);
+    color: white;
   }
 </style>
