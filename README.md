@@ -191,11 +191,27 @@ Click the "import ↑" button to load a previously exported JSON snapshot. This 
 
 You can generate a snapshot based on your Amp or Claude Code conversation using the `generate-maid-snapshots` skill present in `.agents/skills`or `.claude/skills`.
 
+## Evaluation
+
+Evaluate your agent responses using LLM-based scoring on 5 criteria: correctness, completeness, clarity, relevance, and helpfulness.
+
+Requires `OPENROUTER_API_KEY` in your `.env` file.
+
+```ts
+const response = await fetch("http://localhost:6969/api/inspection/evaluate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ userQuery, agentResponse, systemPrompt }),
+});
+```
+
+Returns scores (1-10), overall score, summary, strengths, weaknesses, and suggestions.
+
+You can add a custom system prompt via the UI or when you call the `evaluate()` reporter method.
+
 ## Integrating with the help of a coding agent
 
-You can integrate maid to your custom agent loop by using a custom coding agent of your choice and feeding in the `SETUP.md` prompt:
-
-https://github.com/user-attachments/assets/9d4e250a-2d31-44c0-9e8e-6a1c406af7a2
+You can integrate maid to your custom agent loop by using a custom coding agent of your choice and feeding in the `SETUP.md` prompt.
 
 ## Artifacts
 
