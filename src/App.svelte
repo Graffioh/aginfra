@@ -1,9 +1,19 @@
 <script lang="ts">
   import InspectionPanel from "./lib/InspectionPanel.svelte";
   import JudgePanel from "./lib/JudgePanel.svelte";
+  import { evaluationManager } from "./managers/evaluation.svelte";
 
   let chatWindow: Window | null = null;
   let judgeOpen = $state(false);
+  let resultSeen = $state(false);
+  const evalState = $derived(evaluationManager.state);
+  const showEvalNotification = $derived(!judgeOpen && evalState.result !== null && !resultSeen);
+
+  $effect(() => {
+    if (evalState.result === null) {
+      resultSeen = false;
+    }
+  });
 
   function openChatPopup() {
     if (chatWindow && !chatWindow.closed) {
@@ -20,6 +30,9 @@
 
   function toggleJudge() {
     judgeOpen = !judgeOpen;
+    if (judgeOpen && evalState.result !== null) {
+      resultSeen = true;
+    }
   }
 </script>
 
@@ -34,6 +47,9 @@
       aria-label={judgeOpen ? "Collapse judge panel" : "Expand judge panel"}
       aria-expanded={judgeOpen}
     >
+      {#if showEvalNotification}
+        <span class="eval-pill" title="Evaluation complete. Click to view results.">Result ready</span>
+      {/if}
       <span class="arrow {judgeOpen ? '' : 'collapsed'}">▶</span>
     </button>
     <div id="panel-judge" class={judgeOpen ? "" : "collapsed"}>
@@ -95,8 +111,10 @@
     cursor: pointer;
     padding: 8px 4px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     transition: all 0.2s;
     flex-shrink: 0;
     width: 30px;
@@ -121,6 +139,28 @@
 
   .arrow.collapsed {
     transform: rotate(180deg);
+  }
+
+  .eval-pill {
+    font-size: 9px;
+    padding: 4px 2px;
+    border-radius: 4px;
+    border: 1px solid rgba(126, 231, 135, 0.7);
+    color: #7ee787;
+    background: rgba(126, 231, 135, 0.15);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
   }
 
   :global(*:focus) {

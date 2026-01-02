@@ -87,7 +87,10 @@
         ></textarea>
         <p class="hint">
           If empty, the default evaluation criteria will be used.
-          <span class="hint-note">Note: If a custom prompt is set in the agent loop via the reporter, that one will be used instead.</span>
+          <span class="hint-note"
+            >Note: If a custom prompt is set in the agent loop via the reporter,
+            that one will be used instead.</span
+          >
         </p>
       </div>
     </details>
@@ -100,24 +103,42 @@
       <div class="error-state">
         <p class="error-title">Evaluation Failed</p>
         <p class="error-message">{evalState.error}</p>
-        <button class="retry-button" onclick={() => evaluationManager.clear()}>Dismiss</button>
+        <button class="retry-button" onclick={() => evaluationManager.clear()}
+          >Dismiss</button
+        >
       </div>
     {:else if evalState.result}
       <div class="evaluation">
         <div class="action-buttons">
-          <button class="clear-button" onclick={() => evaluationManager.clear()}>Clear Result</button>
-          <button class="export-button" onclick={exportToMarkdown}>Export .md</button>
+          <button class="clear-button" onclick={() => evaluationManager.clear()}
+            >clear</button
+          >
+          <button class="export-button" onclick={exportToMarkdown}
+            >export ⬇</button
+          >
         </div>
-        <div class="overall-score" style="--score-color: {getScoreColor(evalState.result.overallScore)}">
-          <div class="score-value">{evalState.result.overallScore.toFixed(1)}</div>
+        <div
+          class="overall-score"
+          style="--score-color: {getScoreColor(evalState.result.overallScore)}"
+        >
+          <div class="score-value">
+            {evalState.result.overallScore.toFixed(1)}
+          </div>
           <div class="score-max">/10</div>
-          <div class="score-label">{getScoreLabel(evalState.result.overallScore)}</div>
+          <div class="score-label">
+            {getScoreLabel(evalState.result.overallScore)}
+          </div>
         </div>
 
         <div class="scores-grid">
           {#each Object.entries(evalState.result.scores) as [key, value]}
             <div class="score-card">
-              <div class="score-card-value" style="color: {getScoreColor(value as number)}">{value}</div>
+              <div
+                class="score-card-value"
+                style="color: {getScoreColor(value as number)}"
+              >
+                {value}
+              </div>
               <div class="score-card-label">{key}</div>
             </div>
           {/each}
@@ -180,7 +201,9 @@
     {:else}
       <div class="placeholder">
         <p>LLM as a Judge</p>
-        <p class="hint">Click the 'EVAL' button on any assistant response to evaluate it</p>
+        <p class="hint">
+          Click the 'EVAL' button on any assistant response to evaluate it
+        </p>
       </div>
     {/if}
   </div>
@@ -383,8 +406,13 @@
     transition: all 0.2s;
   }
 
-  .retry-button:hover,
-  .clear-button:hover {
+  .clear-button:hover:not(:disabled) {
+    border-color: rgba(248, 81, 73, 0.7);
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.1);
+  }
+
+  .retry-button:hover {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.5);
     color: rgba(201, 209, 217, 0.9);
