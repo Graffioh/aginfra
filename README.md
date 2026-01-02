@@ -217,7 +217,11 @@ You can integrate maid to your custom agent loop by using a custom coding agent 
 
 ### Demo
 
-https://github.com/user-attachments/assets/5f740626-092a-4464-a594-a59f03c9cc12
+
+
+https://github.com/user-attachments/assets/6f504d4b-1f72-4295-8c61-46ae6fb381fc
+
+
 
 
 
