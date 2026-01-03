@@ -32,6 +32,6 @@ YOU MUST:
 
 When asked to implement or bug fix a feature in the UI, use the playwright skill:
 
-- Use :5555 port for the frontend
-- Import maid-snapshot.json present in the root directory to help you test with data
+- Check /e2e/ folder for the reference tests
+- Use :5555 port for the frontend (even if it's not shown when asked with commands)
 - Clear localStorage before checking the new code

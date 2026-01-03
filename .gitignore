@@ -30,3 +30,6 @@ maid-snapshot*
 .agents/skills/playwright-skill/*
 .claude*
 
+.opencode*
+
+test-results*
